@@ -1,14 +1,33 @@
 import { useState } from "react";
-import FormInput from "../components/Inputs/FormInput";
-import GoogleButton from "../components/Auth/GoogleButton";
 import AuthLink from "../components/Auth/AuthLink";
+import GoogleButton from "../components/Auth/GoogleButton";
+import FormInput from "../components/Inputs/FormInput";
+import axios from "../utils/axiosInstance";
+import { loginSuccess } from "../redux/slice/userSlice";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const response = await axios.post("/auth/login", {
+        email,
+        password,
+      });
+
+      // console.log("Login Response : ", response);
+      
+      const userData = response.data.user;
+      dispatch(loginSuccess(userData));
+    } catch (error) {
+      // console.log("Login Error response : ", error);
+      console.error(error);
+    }
   };
 
   return (

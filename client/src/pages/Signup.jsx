@@ -2,15 +2,32 @@ import { useState } from "react";
 import FormInput from "../components/Inputs/FormInput";
 import GoogleButton from "../components/Auth/GoogleButton";
 import AuthLink from "../components/Auth/AuthLink";
+import axios from "../utils/axiosInstance";
+import {useNavigate} from "react-router"
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Replace with API call logic
+
+    try {
+      const response = await axios.post("/auth/signup", {
+        email,
+        password,
+        name
+      });
+
+      //console.log("SignUp response : ", response);
+      if(response.status == 201) navigate("/login");
+      
+    } catch (error) {
+      // console.log("SignUp Error response : ", error);
+      console.error("Error is : ",error.response.data.message);
+    }
   };
 
   return (
