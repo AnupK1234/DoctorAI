@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/v1/authRoutes');
+const fileRoutes = require('./routes/v1/fileRoutes');
 
 connectDB();
 
@@ -14,5 +15,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/files', fileRoutes);
+
 
 module.exports = app;
