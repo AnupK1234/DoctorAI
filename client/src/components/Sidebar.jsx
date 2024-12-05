@@ -18,7 +18,7 @@ const Sidebar = ({ setSidebarOpen }) => {
         </div>
         <div className="uppercase mt-28">
           <ul className="mt-4 space-y-2 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 flex flex-col items-start justify-start text-left">
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/"
@@ -26,14 +26,14 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <span className="flex-1 whitespace-nowrap px-3">Home</span>
               </Link>
             </li>
-            <li className="">
+            <li>
               <span className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black cursor-default">
                 <span className="flex-1 whitespace-nowrap px-3">
                   Who We Are ▾
                 </span>
               </span>
             </li>
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 font-normal text-gray-900 hover:bg-gray-100 dark:text-white ml-10 text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/about"
@@ -41,7 +41,7 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <span className="flex-1 whitespace-nowrap px-3">About</span>
               </Link>
             </li>
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 font-normal text-gray-900 hover:bg-gray-100 dark:text-white ml-10 text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/solutions"
@@ -49,7 +49,7 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <span className="flex-1 whitespace-nowrap px-3">Solutions</span>
               </Link>
             </li>
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/pricing"
@@ -57,7 +57,7 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <span className="flex-1 whitespace-nowrap px-3">Pricing</span>
               </Link>
             </li>
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/help"
@@ -65,7 +65,7 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <span className="flex-1 whitespace-nowrap px-3">Help</span>
               </Link>
             </li>
-            <li className="">
+            <li>
               <Link
                 className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/contact"

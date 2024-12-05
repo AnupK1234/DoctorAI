@@ -2,7 +2,6 @@ import Navbar from "../components/Navbar";
 const Home = () => {
   return (
     <>
-      <Navbar />
       <div className="bg-black text-white">
         <div className="flex items-center justify-between p-10">
           <div className="max-w-md">
