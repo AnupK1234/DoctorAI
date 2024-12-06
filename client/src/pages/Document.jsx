@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UploadIcon from "../assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
 import { documentsArr } from "../constants/constants";
 import axios from "../utils/axiosInstance";
+import { fetchDocuments } from "../utils/api";
 
 const Document = () => {
-  const [documents, setDocuments] = useState(documentsArr);
+  const [documents, setDocuments] = useState();
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -26,17 +27,26 @@ const Document = () => {
 
         // Parsing pdf
         if (uploadRes.status == 201) {
-          const parseRes = await axios.post(
-            "/files/parse",
-            { fileUrl: uploadRes.data.file.fileUrl },
-          );
+          const parseRes = await axios.post("/files/parse", {
+            file: uploadRes.data.file,
+          });
         }
-        
       } catch (error) {
         console.log("Error in uploading file : ", error);
       }
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const docs = await fetchDocuments();
+      setDocuments(docs.data);
+    };
+
+    fetchData();
+  }, []);
+
+  console.log("docus : ", documents);
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-white text-black py-10">
@@ -66,10 +76,10 @@ const Document = () => {
             documents?.map((doc) => (
               <Accordion key={doc.id} title={doc.title}>
                 <p>
-                  <strong>Date:</strong> {doc.date}
+                  <strong>Date:</strong> {doc.createdAt}
                 </p>
                 <p>
-                  <strong>Document ID:</strong> {doc.id}
+                  <strong>Document ID:</strong> {doc._id}
                 </p>
                 <p>
                   <strong>Summary:</strong> {doc.summary}
