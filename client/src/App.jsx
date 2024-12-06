@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
+import Document from "./pages/Document";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/login" element={useHomeLayout(Login)} />
         <Route path="/signup" element={useHomeLayout(Signup)} />
         <Route path="/pricing" element={useHomeLayout(Pricing)} />
+        <Route path="/upload-doc" element={useHomeLayout(Document)} />
       </Routes>
     </BrowserRouter>
   );

@@ -19,3 +19,24 @@ export const pricingPlans = [
     features: ["100+ developers", "36", "36"],
   },
 ];
+
+export const documentsArr = [
+  {
+    id: "doc1",
+    title: "Document 1",
+    date: "2024-12-06",
+    summary: "This is a summary of Document 1.",
+  },
+  {
+    id: "doc2",
+    title: "Document 2",
+    date: "2024-11-30",
+    summary: "This is a summary of Document 2.",
+  },
+  {
+    id: "doc3",
+    title: "Document 3",
+    date: "2024-11-25",
+    summary: "This is a summary of Document 3.",
+  },
+]
