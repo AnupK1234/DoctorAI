@@ -1,20 +1,8 @@
 const Footer = () => {
   return (
     <>
-      <div className="w-full bg-price-gradient lg:h-[475px]">
-        <div className="m-14 border-b-2 border-black flex flex-col lg:flex-row lg:justify-between">
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left lg:mb-0">
-            <img
-              width="200"
-              height="46"
-              className="relative"
-              src="https://e7.pngegg.com/pngimages/243/790/png-clipart-your-company-logo-doing-business-as-company-logo-name-creative-company-logo-free-logo-design-template-text.png"
-              style={{ color: "transparent" }}
-            />
-            <h4 className="mt-6 text-[20px] leading-tight font-medium">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia
-            </h4>
-          </div>
+      <div className="w-full bg-price-gradient lg:h-[400px]">
+        <div className="m-4 border-b-2 border-black flex flex-col lg:flex-row lg:justify-end">
           <div className="mb-[74px] flex flex-col-reverse lg:flex-col items-center lg:items-start text-center lg:text-left">
             <div>
               <p className="text-base font-medium mt-11 lg:mt-0">Follow us:</p>
@@ -28,10 +16,7 @@ const Footer = () => {
                     style={{ color: "transparent" }}
                   />
                 </a>
-                <a
-                  href=""
-                  target="_blank"
-                >
+                <a href="" target="_blank">
                   <img
                     alt="Instagram Logo"
                     loading="lazy"
@@ -61,10 +46,7 @@ const Footer = () => {
                     style={{ color: "transparent" }}
                   />
                 </a>
-                <a
-                  href=""
-                  target="_blank"
-                >
+                <a href="" target="_blank">
                   <img
                     width="30"
                     height="30"
@@ -108,7 +90,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-center my-14 text-base text-center font-medium">
+        <div className="flex flex-col md:flex-row justify-center my-4 text-base text-center font-medium">
           <p>All Rights Reserved © Copyright DoctorAi</p>
           <span className="hidden md:block">&nbsp;|&nbsp;</span>
           <a className="underline" href="/privacy-policy/">

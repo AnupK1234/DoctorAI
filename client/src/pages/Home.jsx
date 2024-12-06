@@ -12,7 +12,7 @@ const Home = () => {
             </p>
           </div>
           <div>
-            <video
+            {/* <video
               autoPlay
               loop
               playsInline
@@ -23,7 +23,8 @@ const Home = () => {
                 src="https://portalis.ai/videos/Elena.mp4"
                 type="video/mp4"
               />
-            </video>
+            </video> */}
+            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/doctor-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--medical-healthcare-health-avatar-pack-people-illustrations-4715129.png" className="h-[25rem]" />
           </div>
         </div>
         <div className="bg-white p-10 text-black">

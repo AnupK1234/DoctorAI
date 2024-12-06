@@ -1,46 +1,20 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import HomeLayout from "./components/HomeLayout";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import useHomeLayout from "./hooks/useHomeLayout";
 import Contact from "./pages/Contact";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <HomeLayout>
-              <Home />
-            </HomeLayout>
-          }
-        />
-        <Route
-          path="/contact"
-          element={
-            <HomeLayout>
-              <Contact />
-            </HomeLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <HomeLayout>
-              <Login />
-            </HomeLayout>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <HomeLayout>
-              <Signup />
-            </HomeLayout>
-          }
-        />
+        <Route path="/" element={useHomeLayout(Home)} />
+        <Route path="/contact" element={useHomeLayout(Contact)} />
+        <Route path="/login" element={useHomeLayout(Login)} />
+        <Route path="/signup" element={useHomeLayout(Signup)} />
+        <Route path="/pricing" element={useHomeLayout(Pricing)} />
       </Routes>
     </BrowserRouter>
   );

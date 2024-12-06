@@ -36,6 +36,15 @@ const uploadFile = async (req, res) => {
       message: "File uploaded successfully",
       file: newFile,
     });
+
+    /***
+     * const pdf = parsePdf()
+     * const rawData = pdf;
+     * 
+     * pass rawData to GPT -> Get title from this data and summarize the data
+     * 
+     */
+
   } catch (error) {
     console.error(error);
     res.status(500).json({
