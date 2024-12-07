@@ -40,3 +40,24 @@ export const documentsArr = [
     summary: "This is a summary of Document 3.",
   },
 ]
+
+export const testimonials = [
+  {
+    quote: "The AI assistant provided accurate insights about my health. It’s like having a doctor available 24/7. Highly recommended!",
+    clientName: "Client A",
+    clientTitle: "Software Engineer",
+    avatar: "https://avatar.iran.liara.run/public/12",
+  },
+  {
+    quote: "I love how intuitive and fast the platform is. Uploading documents was seamless, and the AI chat felt very human-like.",
+    clientName: "Client B",
+    clientTitle: "Marketing Manager",
+    avatar: "https://avatar.iran.liara.run/public/12",
+  },
+  {
+    quote: "This platform has simplified my healthcare journey. The reminders and follow-ups were especially helpful for managing my condition.",
+    clientName: "Client C",
+    clientTitle: "Entrepreneur",
+    avatar: "https://avatar.iran.liara.run/public/12",
+  },
+];

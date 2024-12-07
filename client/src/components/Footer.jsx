@@ -1,3 +1,4 @@
+import { svgBasePath } from "../utils/imgConfig";
 const Footer = () => {
   return (
     <>
@@ -12,7 +13,7 @@ const Footer = () => {
                     width="30"
                     height="30"
                     className="relative"
-                    src="https://portalis.ai/icons/facebook.svg"
+                    src={`${svgBasePath}/facebook.svg`}
                     style={{ color: "transparent" }}
                   />
                 </a>
@@ -23,7 +24,7 @@ const Footer = () => {
                     width="30"
                     height="30"
                     className="relative"
-                    src="https://portalis.ai/icons/instagram.svg"
+                    src={`${svgBasePath}/instagram.svg`}
                     style={{ color: "transparent" }}
                   />
                 </a>
@@ -33,7 +34,7 @@ const Footer = () => {
                     width="30"
                     height="30"
                     className="relative"
-                    src="https://portalis.ai/icons/x.svg"
+                    src={`${svgBasePath}/x.svg`}
                     style={{ color: "transparent" }}
                   />
                 </a>
@@ -42,7 +43,7 @@ const Footer = () => {
                     width="30"
                     height="30"
                     className="relative"
-                    src="https://portalis.ai/icons/youtube.svg"
+                    src={`${svgBasePath}/youtube.svg`}
                     style={{ color: "transparent" }}
                   />
                 </a>
@@ -51,7 +52,7 @@ const Footer = () => {
                     width="30"
                     height="30"
                     className="relative"
-                    src="https://portalis.ai/icons/linkedin.svg"
+                    src={`${svgBasePath}/linkedin.svg`}
                     style={{ color: "transparent" }}
                   />
                 </a>
@@ -79,7 +80,7 @@ const Footer = () => {
                         width="30"
                         height="30"
                         className="relative"
-                        src="https://portalis.ai/icons/sign-up-arrow.svg"
+                        src={`${svgBasePath}/sign-up-arrow.svg`}
                         style={{ color: "transparent" }}
                       />
                       <span className="sr-only">Search</span>

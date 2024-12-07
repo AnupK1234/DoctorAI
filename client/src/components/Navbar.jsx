@@ -5,6 +5,7 @@ import ArrowUp from "../assets/svg/ArrowUp";
 import { logout } from "../redux/slice/userSlice";
 import Sidebar from "./sidebar";
 import axios from "../utils/axiosInstance"
+import { svgBasePath } from "../utils/imgConfig";
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,7 +32,7 @@ const Navbar = () => {
             alt="menu icon"
             width="19"
             height="19"
-            src="https://portalis.ai/icons/hamburger.svg"
+            src={`${svgBasePath}/hamburger.svg`}
             style={{ color: "transparent" }}
           />
         </div>
@@ -56,7 +57,7 @@ const Navbar = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <img
-                src={user.avatar || "https://via.placeholder.com/32"}
+                src={user.avatar || "https://avatar.iran.liara.run/public/boy"}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full border border-gray-300"
               />
