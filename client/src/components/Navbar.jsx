@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
 import ArrowUp from "../assets/svg/ArrowUp";
 import { logout } from "../redux/slice/userSlice";
-import Sidebar from "./sidebar";
+import Sidebar from "./Sidebar";
 import axios from "../utils/axiosInstance"
 import { svgBasePath } from "../utils/imgConfig";
 
