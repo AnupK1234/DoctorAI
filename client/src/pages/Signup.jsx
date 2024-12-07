@@ -67,7 +67,6 @@ const Signup = () => {
           >
             Sign Up
           </button>
-          <GoogleButton text="Sign Up with Google" />
           <AuthLink
             text="Already a user?"
             linkText="Login here"

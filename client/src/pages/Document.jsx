@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import UploadIcon from "../assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
-import { documentsArr } from "../constants/constants";
-import axios from "../utils/axiosInstance";
 import { fetchDocuments } from "../utils/api";
+import axios from "../utils/axiosInstance";
 
 const Document = () => {
   const [documents, setDocuments] = useState();
@@ -46,8 +45,6 @@ const Document = () => {
     fetchData();
   }, []);
 
-  console.log("docus : ", documents);
-
   return (
     <div className="min-h-screen flex flex-col items-center bg-white text-black py-10">
       <div className="w-full max-w-md">
@@ -73,8 +70,8 @@ const Document = () => {
 
         <div className="mt-10">
           {documents &&
-            documents?.map((doc) => (
-              <Accordion key={doc.id} title={doc.title}>
+            documents?.map((doc, index) => (
+              <Accordion key={doc._id} title={doc.title}>
                 <p>
                   <strong>Date:</strong> {doc.createdAt}
                 </p>

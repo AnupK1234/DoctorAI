@@ -6,8 +6,13 @@ import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
 import Document from "./pages/Document";
+import Avatar from "./pages/Avatar";
+import useAuthCheck from "./hooks/useAuthCheck";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import NotFound from "./components/NotFound";
 
 const App = () => {
+  useAuthCheck();
   return (
     <BrowserRouter>
       <Routes>
@@ -16,7 +21,15 @@ const App = () => {
         <Route path="/login" element={useHomeLayout(Login)} />
         <Route path="/signup" element={useHomeLayout(Signup)} />
         <Route path="/pricing" element={useHomeLayout(Pricing)} />
-        <Route path="/upload-doc" element={useHomeLayout(Document)} />
+        <Route
+          path="/upload-doc"
+          element={<ProtectedRoute element={useHomeLayout(Document)} />}
+        />
+        <Route
+          path="/avatar"
+          element={<ProtectedRoute element={useHomeLayout(Avatar)} />}
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

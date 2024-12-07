@@ -1,4 +1,3 @@
-import Navbar from "../components/Navbar";
 const Home = () => {
   return (
     <>
@@ -12,19 +11,10 @@ const Home = () => {
             </p>
           </div>
           <div>
-            {/* <video
-              autoPlay
-              loop
-              playsInline
-              muted
-              className="rounded-lg w-[400px]"
-            >
-              <source
-                src="https://portalis.ai/videos/Elena.mp4"
-                type="video/mp4"
-              />
-            </video> */}
-            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/doctor-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--medical-healthcare-health-avatar-pack-people-illustrations-4715129.png" className="h-[25rem]" />
+            <img
+              src="https://cdn3d.iconscout.com/3d/premium/thumb/doctor-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--medical-healthcare-health-avatar-pack-people-illustrations-4715129.png"
+              className="h-[25rem]"
+            />
           </div>
         </div>
         <div className="bg-white p-10 text-black">
@@ -34,22 +24,30 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gray-100 p-6 rounded-lg">
               <p className="text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                "I was initially skeptical about using an AI-powered doctor
+                website, but I was pleasantly surprised. The AI accurately
+                diagnosed my symptoms and provided clear treatment
+                recommendations. It saved me time and worry, and I'm grateful
+                for the convenience."
               </p>
               <p className="text-sm mt-4">- Client A</p>
             </div>
             <div className="bg-gray-100 p-6 rounded-lg">
               <p className="text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                "The AI doctor website offered a truly personalized experience.
+                It asked detailed questions about my medical history and
+                lifestyle to provide tailored advice. The follow-up support and
+                reminders were also helpful in managing my health condition."
               </p>
               <p className="text-sm mt-4">- Client B</p>
             </div>
             <div className="bg-gray-100 p-6 rounded-lg">
               <p className="text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                "As someone with a busy schedule, I found the AI doctor website
+                to be a lifesaver. I could access medical advice anytime,
+                anywhere, without having to wait for appointments or visit a
+                clinic. The affordable fees made it a great option for regular
+                health check-ups."
               </p>
               <p className="text-sm mt-4">- Client C</p>
             </div>

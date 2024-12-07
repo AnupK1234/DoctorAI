@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const morgan = require('morgan')
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const cors = require("cors");
@@ -11,6 +12,7 @@ connectDB();
 const app = express();
 
 // Middleware
+app.use(morgan('tiny'))
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,

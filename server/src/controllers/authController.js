@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const { signToken } = require("../utils/jwtUtils");
+const { signToken, verifyToken } = require("../utils/jwtUtils");
 
 const signup = async (req, res) => {
   try {
@@ -65,4 +65,21 @@ const logout = (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 };
 
-module.exports = { signup, login, logout };
+const validateToken = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  try {
+    const decoded = verifyToken(token);
+    const { id } = decoded;
+    const user = await User.findOne({ _id: id }).select("_id name email");
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+module.exports = { signup, login, logout, validateToken };

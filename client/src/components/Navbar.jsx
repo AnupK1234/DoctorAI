@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import ArrowUp from "../assets/svg/ArrowUp";
 import { logout } from "../redux/slice/userSlice";
 import Sidebar from "./sidebar";
+import axios from "../utils/axiosInstance"
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,8 +13,9 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.user);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await axios.post("/auth/logout");
+    dispatch(logout()); 
     setDropdownOpen(false);
   };
   
@@ -36,15 +38,7 @@ const Navbar = () => {
 
         {/* Center Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <a href="/">
-            <img
-              width="110"
-              height="25"
-              className="relative"
-              src="https://portalis.ai/portalis-white.svg"
-              style={{ color: "transparent" }}
-            />
-          </a>
+            <h1 className="text-white text-3xl font-bold">DoctorAI</h1>
         </div>
 
         {/* Login Button or User Avatar */}

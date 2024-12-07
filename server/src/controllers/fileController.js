@@ -77,7 +77,9 @@ Response format:
 
 const getAllDocuments = async (req, res) => {
   try {
-    const documents = await File.find();
+    const { id } = req.user;
+
+    const documents = await File.find({ user: id });
 
     res.status(201).send(documents);
   } catch (error) {

@@ -5,11 +5,13 @@ import FormInput from "../components/Inputs/FormInput";
 import axios from "../utils/axiosInstance";
 import { loginSuccess } from "../redux/slice/userSlice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,10 +22,10 @@ const Login = () => {
         password,
       });
 
-      // console.log("Login Response : ", response);
-      
+      console.log("Login Response : ", response);
       const userData = response.data.user;
       dispatch(loginSuccess(userData));
+      if(response.status == 200) navigate("/");
     } catch (error) {
       // console.log("Login Error response : ", error);
       console.error(error);
@@ -59,7 +61,6 @@ const Login = () => {
           >
             Login
           </button>
-          <GoogleButton text="Login with Google" />
           <AuthLink
             text="New to the platform?"
             linkText="Register here"
