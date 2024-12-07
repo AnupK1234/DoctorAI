@@ -3,6 +3,7 @@ import UploadIcon from "../assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
 import { fetchDocuments } from "../utils/api";
 import axios from "../utils/axiosInstance";
+import { Link } from "react-router";
 
 const Document = () => {
   const [documents, setDocuments] = useState();
@@ -77,6 +78,10 @@ const Document = () => {
                 </p>
                 <p>
                   <strong>Document ID:</strong> {doc._id}
+                </p>
+                <p>
+                  <strong>Document Link:</strong>{" "}
+                  <Link to={doc.fileUrl} className="text-blue-500 font-bold">Link</Link>
                 </p>
                 <p>
                   <strong>Summary:</strong> {doc.summary}

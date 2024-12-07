@@ -10,6 +10,7 @@ import Avatar from "./pages/Avatar";
 import useAuthCheck from "./hooks/useAuthCheck";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import NotFound from "./components/NotFound";
+import About from "./pages/About";
 
 const App = () => {
   useAuthCheck();
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/login" element={useHomeLayout(Login)} />
         <Route path="/signup" element={useHomeLayout(Signup)} />
         <Route path="/pricing" element={useHomeLayout(Pricing)} />
+        <Route path="/about" element={useHomeLayout(About)} />
         <Route
           path="/upload-doc"
           element={<ProtectedRoute element={useHomeLayout(Document)} />}

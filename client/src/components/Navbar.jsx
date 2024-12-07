@@ -57,7 +57,7 @@ const Navbar = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <img
-                src={user.avatar || "https://avatar.iran.liara.run/public/boy"}
+                src={user?.avatar || "https://avatar.iran.liara.run/public/boy"}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full border border-gray-300"
               />
