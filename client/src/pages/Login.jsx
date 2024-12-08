@@ -21,8 +21,6 @@ const Login = () => {
         email,
         password,
       });
-
-      console.log("Login Response : ", response);
       const userData = response.data.user;
       dispatch(loginSuccess(userData));
       if(response.status == 200) navigate("/");

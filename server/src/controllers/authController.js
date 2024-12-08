@@ -44,13 +44,20 @@ const login = async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
+    
     const token = signToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
+      expires: new Date(Date.now() + 24 * 3600000), // 24hr expiry
       secure: process.env.NODE_ENV === "production",
     });
 
+    const userObject = { _id: user._id, name: user.name, email: user.email };
+    res.cookie("userObject", JSON.stringify(userObject) , {
+      expires: new Date(Date.now() + 24 * 3600000), // 24hr expiry
+      secure: process.env.NODE_ENV === "production",
+    })
+    
     res.status(200).json({
       message: "Login successful",
       user: { id: user._id, email, name: user.name },
@@ -62,6 +69,7 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
   res.clearCookie("token");
+  res.clearCookie("userObject");
   res.status(200).json({ message: "Logged out successfully" });
 };
 

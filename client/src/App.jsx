@@ -1,19 +1,17 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import NotFound from "./components/NotFound";
 import useHomeLayout from "./hooks/useHomeLayout";
+import About from "./pages/About";
+import Avatar from "./pages/Avatar";
 import Contact from "./pages/Contact";
+import Document from "./pages/Document";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
-import Document from "./pages/Document";
-import Avatar from "./pages/Avatar";
-import useAuthCheck from "./hooks/useAuthCheck";
-import ProtectedRoute from "./components/Auth/ProtectedRoute";
-import NotFound from "./components/NotFound";
-import About from "./pages/About";
 
 const App = () => {
-  useAuthCheck();
   return (
     <BrowserRouter>
       <Routes>

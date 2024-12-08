@@ -1,8 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Cookie from "js-cookie";
+
+const userCookie = Cookie.get("userObject") ? JSON.parse(Cookie.get("userObject")) : null;
 
 const initialState = {
-  isLoggedIn: false,
-  user: null,
+  isLoggedIn: !!userCookie,
+  user: userCookie,
 };
 
 export const userSlice = createSlice({
