@@ -50,12 +50,14 @@ const login = async (req, res) => {
       httpOnly: true,
       expires: new Date(Date.now() + 24 * 3600000), // 24hr expiry
       secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
     });
 
     const userObject = { _id: user._id, name: user.name, email: user.email };
     res.cookie("userObject", JSON.stringify(userObject) , {
       expires: new Date(Date.now() + 24 * 3600000), // 24hr expiry
       secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
     })
     
     res.status(200).json({
