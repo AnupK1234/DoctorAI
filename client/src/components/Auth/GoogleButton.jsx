@@ -1,4 +1,4 @@
-import { GoogleIcon } from "../../assets/svg/GoogleIcon";
+import { GoogleIcon } from "../../../public/assets/svg/GoogleIcon";
 
 const GoogleButton = ({ text }) => (
   <button

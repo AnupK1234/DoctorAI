@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { RealtimeClient } from "@openai/realtime-api-beta";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SimliClient } from "simli-client";
-import VideoBox from "./VideoBox";
-import cn from "../../utils/TailwindMergeAndClsx";
-import IconExit from "../../assets/svg/IconExit";
-import IconSparkleLoader from "./IconSparkleLoader";
+import IconExit from "../../../public/assets/svg/IconExit";
 import { OPENAI_API_KEY, SIMLI_API_KEY } from "../../constants/keys";
+import cn from "../../utils/TailwindMergeAndClsx";
+import IconSparkleLoader from "./IconSparkleLoader";
+import VideoBox from "./VideoBox";
 
 interface SimliOpenAIPushToTalkProps {
   simli_faceid: string;

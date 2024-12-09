@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
-import ArrowUp from "../assets/svg/ArrowUp";
+import ArrowUp from "../../public/assets/svg/ArrowUp";
 import { logout } from "../redux/slice/userSlice";
-import Sidebar from "./Sidebar";
-import axios from "../utils/axiosInstance"
+import axios from "../utils/axiosInstance";
 import { svgBasePath } from "../utils/imgConfig";
+import Sidebar from "./Sidebar";
 
 const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

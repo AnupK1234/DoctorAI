@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import UploadIcon from "../assets/svg/UploadIcon";
+import { Link } from "react-router";
+import UploadIcon from "../../public/assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
 import { fetchDocuments } from "../utils/api";
 import axios from "../utils/axiosInstance";
-import { Link } from "react-router";
 
 const Document = () => {
   const [documents, setDocuments] = useState();
