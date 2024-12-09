@@ -1,9 +1,9 @@
+import Cookie from "js-cookie";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
 import ArrowUp from "../../public/assets/svg/ArrowUp";
 import { logout } from "../redux/slice/userSlice";
-import axios from "../utils/axiosInstance";
 import { svgBasePath } from "../utils/imgConfig";
 import Sidebar from "./Sidebar";
 
@@ -15,11 +15,12 @@ const Navbar = () => {
   const { isLoggedIn, user } = useSelector((state) => state.user);
 
   const handleLogout = async () => {
-    await axios.post("/auth/logout");
-    dispatch(logout()); 
+    Cookie.remove("token");
+    Cookie.remove("userObject");
+    dispatch(logout());
     setDropdownOpen(false);
   };
-  
+
   return (
     <>
       <nav className="flex h-16 justify-between lg:justify-between items-center px-5 lg:px-8 py-5 bg-black">
@@ -39,7 +40,7 @@ const Navbar = () => {
 
         {/* Center Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="text-white text-3xl font-bold">DoctorAI</h1>
+          <h1 className="text-white text-3xl font-bold">DoctorAI</h1>
         </div>
 
         {/* Login Button or User Avatar */}
@@ -88,7 +89,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Sidebar */}
       {sidebarOpen && <Sidebar setSidebarOpen={setSidebarOpen} />}
     </>
   );
