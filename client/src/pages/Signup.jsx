@@ -9,10 +9,12 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await axios.post("/auth/signup", {
@@ -26,7 +28,11 @@ const Signup = () => {
       
     } catch (error) {
       // console.log("SignUp Error response : ", error);
-      console.error("Error is : ",error.response.data.message);
+      if (error.response && error.response.status === 400) {
+        setError("Password must be 8-20 characters long and include at least one letter, one number, and one special character");
+      } else {
+        console.error(error); 
+      }
     }
   };
 
@@ -61,6 +67,7 @@ const Signup = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
           />
+          {error && <p className="text-red-500 text-center">{error}</p>}
           <button
             type="submit"
             className="w-full bg-gray-800 text-white rounded-lg py-3 font-semibold hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-800"
