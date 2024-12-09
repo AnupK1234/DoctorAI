@@ -9,7 +9,7 @@ const Home = () => {
       <div className="bg-white text-black">
         {/* Hero Section */}
         <div className="flex flex-col-reverse md:flex-row items-center justify-between p-10">
-          <div className="max-w-md text-center md:text-left">
+          <div className="lg:h-full lg:mb-52 lg:ml-14 max-w-md text-center md:text-left">
             <h1 className="text-5xl font-extrabold mb-6 leading-tight">
               Your Health, <span className="text-blue-600">Reimagined</span>
             </h1>

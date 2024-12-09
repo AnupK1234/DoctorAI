@@ -419,14 +419,15 @@ const SimliOpenAI: React.FC<SimliOpenAIProps> = ({
             onClick={handleStart}
             disabled={isLoading}
             className={cn(
-              "w-full h-[52px] mt-4 disabled:bg-[#343434] disabled:text-white disabled:hover:rounded-[100px] bg-blue-600 text-white py-3 px-6 rounded-[100px] transition-all duration-300 hover:text-black hover:bg-white hover:rounded-sm",
-              "flex justify-center items-center"
+              "w-full h-[52px] mt-4 disabled:bg-[#343434] bg-blue-600 text-white py-3 px-6 rounded-[100px] transition-all duration-300 hover:text-black hover:bg-blue-400",
+              "flex justify-center items-center",
+              "hover:bg-blue-400 !important" 
             )}
           >
             {isLoading ? (
               <IconSparkleLoader className="h-[20px] animate-loader" />
             ) : (
-              <span className="font-abc-repro-mono font-bold w-[164px]">
+              <span className="font-bold w-[164px]">
                 Connect with AI Doctor
               </span>
             )}
