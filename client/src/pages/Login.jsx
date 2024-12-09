@@ -1,11 +1,11 @@
 import { useState } from "react";
-import AuthLink from "../components/Auth/AuthLink";
-import GoogleButton from "../components/Auth/GoogleButton";
-import FormInput from "../components/Inputs/FormInput";
-import axios from "../utils/axiosInstance";
-import { loginSuccess } from "../redux/slice/userSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+import AuthLink from "../components/Auth/AuthLink";
+import FormInput from "../components/Inputs/FormInput";
+import { loginSuccess } from "../redux/slice/userSlice";
+import axios from "../utils/axiosInstance";
+import Cookie from "js-cookie"
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,8 +22,14 @@ const Login = () => {
         password,
       });
       const userData = response.data.user;
+      const cookies = response.data.cookie;
+
       dispatch(loginSuccess(userData));
-      if(response.status == 200) navigate("/");
+      if(response.status == 200){
+        Cookie.set('token', cookies.token,  { expires: 1 })
+        Cookie.set('userObject', JSON.stringify(cookies.userObject),  { expires: 1 })    
+        navigate("/");
+      }
     } catch (error) {
       // console.log("Login Error response : ", error);
       console.error(error);
