@@ -1,3 +1,4 @@
+import Cookie from "js-cookie";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
@@ -5,7 +6,6 @@ import AuthLink from "../components/Auth/AuthLink";
 import FormInput from "../components/Inputs/FormInput";
 import { loginSuccess } from "../redux/slice/userSlice";
 import axios from "../utils/axiosInstance";
-import Cookie from "js-cookie"
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,9 +25,19 @@ const Login = () => {
       const cookies = response.data.cookie;
 
       dispatch(loginSuccess(userData));
-      if(response.status == 200){
-        Cookie.set('token', cookies.token,  { expires: 1 })
-        Cookie.set('userObject', JSON.stringify(cookies.userObject),  { expires: 1 })    
+      if (response.status == 200) {
+        Cookie.set("token", cookies.token, {
+          expires: 1,
+          secure: true, // Ensures it's sent only over HTTPS
+          sameSite: "None", // Required for cross-origin cookies
+          path: "/",
+        });
+        Cookie.set("userObject", JSON.stringify(cookies.userObject), {
+          expires: 1,
+          secure: true, // Ensures it's sent only over HTTPS
+          sameSite: "None", // Required for cross-origin cookies
+          path: "/",
+        });
         navigate("/");
       }
     } catch (error) {
