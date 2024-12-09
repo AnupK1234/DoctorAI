@@ -81,7 +81,9 @@ const Document = () => {
                 </p>
                 <p>
                   <strong>Document Link:</strong>{" "}
-                  <Link to={doc.fileUrl} className="text-blue-500 font-bold">Link</Link>
+                  <Link to={doc.fileUrl} className="text-blue-500 font-bold">
+                    Link
+                  </Link>
                 </p>
                 <p>
                   <strong>Summary:</strong> {doc.summary}

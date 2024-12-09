@@ -2,9 +2,11 @@ const { verifyToken } = require("../utils/jwtUtils");
 
 const authMiddleware = (req, res, next) => {
   try {
-    const token = req.cookies.token;
-    console.log("Cokieee : ", req.cookies);
+    const token = req.body.token;
+
+    console.log("Tokennnn : ", req.body);
     
+
     if (!token) {
       return res.status(401).json({ message: "Authentication required" });
     }

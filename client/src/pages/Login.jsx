@@ -28,15 +28,9 @@ const Login = () => {
       if (response.status == 200) {
         Cookie.set("token", cookies.token, {
           expires: 1,
-          secure: true, // Ensures it's sent only over HTTPS
-          sameSite: "None", // Required for cross-origin cookies
-          path: "/",
         });
         Cookie.set("userObject", JSON.stringify(cookies.userObject), {
           expires: 1,
-          secure: true, // Ensures it's sent only over HTTPS
-          sameSite: "None", // Required for cross-origin cookies
-          path: "/",
         });
         navigate("/");
       }

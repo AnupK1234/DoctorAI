@@ -1,7 +1,7 @@
 import axios from "./axiosInstance";
 
 const fetchDocuments = async () => {
-  const documents = await axios.get("/files/get-documents");
+  const documents = await axios.post("/files/get-documents");
 
   return documents;
 };
