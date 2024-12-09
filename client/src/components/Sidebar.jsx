@@ -12,13 +12,23 @@ const Sidebar = ({ setSidebarOpen }) => {
           className="mt-1.5 ml-5 cursor-pointer"
           onClick={() => setSidebarOpen(false)}
         >
-          <img
-            alt="close icon"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
             width="19"
             height="19"
-            src={`${svgBasePath}/close.svg`}
-            style={{ color: "transparent" }}
-          />
+            viewBox="0 0 20 21"
+            fill="none"
+            className="text-black dark:text-white"
+          >
+            <path
+              d="M2.75537 20.0601L1.14206 18.4468L16.3649 0.940429L17.9782 2.55374L2.75537 20.0601Z"
+              fill="currentColor"
+            />
+            <path
+              d="M16.3647 20.0601L17.9781 18.4468L2.75523 0.940429L1.14192 2.55374L16.3647 20.0601Z"
+              fill="currentColor"
+            />
+          </svg>
         </div>
         <div className="uppercase mt-28">
           <ul className="mt-4 space-y-2 border-t border-gray-200 pt-4 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700 flex flex-col items-start justify-start text-left">
@@ -71,26 +81,10 @@ const Sidebar = ({ setSidebarOpen }) => {
             </li>
             <li>
               <Link
-                className="flex items-center justify-center rounded-lg p-2 font-normal text-gray-900 hover:bg-gray-100 dark:text-white ml-10 text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
-                to="/solutions"
-              >
-                <span className="flex-1 whitespace-nowrap px-3">Solutions</span>
-              </Link>
-            </li>
-            <li>
-              <Link
                 className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                 to="/pricing"
               >
                 <span className="flex-1 whitespace-nowrap px-3">Pricing</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
-                to="/help"
-              >
-                <span className="flex-1 whitespace-nowrap px-3">Help</span>
               </Link>
             </li>
             <li>

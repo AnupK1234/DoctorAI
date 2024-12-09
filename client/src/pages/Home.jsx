@@ -1,5 +1,7 @@
+import { Link } from "react-router";
 import Features from "../components/Features";
 import Testimonial from "../components/Testimonial";
+import Avatar from "./Avatar";
 
 const Home = () => {
   return (
@@ -17,9 +19,9 @@ const Home = () => {
               and receive personalized health insights.
             </p>
             <div className="flex justify-center md:justify-start gap-4">
-              <button className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition">
+              <Link to="/avatar" className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition">
                 Get Started
-              </button>
+              </Link>
               <button className="bg-transparent border-2 border-blue-600 text-blue-600 font-bold py-2 px-6 rounded-lg hover:bg-blue-600 hover:text-white transition">
                 Learn More
               </button>
@@ -27,12 +29,8 @@ const Home = () => {
           </div>
 
           {/* Image Section */}
-          <div className="mb-10 md:mb-0">
-            <img
-              src="https://cdn3d.iconscout.com/3d/premium/thumb/doctor-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--medical-healthcare-health-avatar-pack-people-illustrations-4715129.png"
-              className="h-[25rem] rounded-xl shadow-lg hover:scale-105 transition-transform"
-              alt="AI Doctor Avatar"
-            />
+          <div className="">
+            <Avatar/>
           </div>
         </div>
 

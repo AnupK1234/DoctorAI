@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
+import Avatar2 from "./pages/Avatar2";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/signup" element={useHomeLayout(Signup)} />
         <Route path="/pricing" element={useHomeLayout(Pricing)} />
         <Route path="/about" element={useHomeLayout(About)} />
+        <Route path="/avatar2" element={useHomeLayout(Avatar2)} />
         <Route
           path="/upload-doc"
           element={<ProtectedRoute element={useHomeLayout(Document)} />}
