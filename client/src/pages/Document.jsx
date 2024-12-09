@@ -26,7 +26,6 @@ const Document = () => {
         const uploadRes = await axios.post("/files/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
-             Authorization: `Bearer ${token}`
           },
         });
 
@@ -35,8 +34,11 @@ const Document = () => {
           const parseRes = await axios.post("/files/parse", {
             file: uploadRes.data.file,
           });
+
+          if(parseRes.status == 201) alert("Your file has been uploaded")
         }
       } catch (error) {
+        alert("Error uploading file")
         console.log("Error in uploading file : ", error);
       }
     }
