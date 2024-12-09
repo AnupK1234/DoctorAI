@@ -39,7 +39,7 @@ const Avatar = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen flex flex-col items-center font-abc-repro font-normal text-sm text-white p-8">
+    <div className="min-h-screen flex flex-col items-center font-abc-repro font-normal text-sm text-white p-8">
       {showDottedFace && (
         <div className="absolute bottom-[32px] right-[32px] flex gap-2">
           <button
