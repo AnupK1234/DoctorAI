@@ -2,9 +2,9 @@ const { verifyToken } = require("../utils/jwtUtils");
 
 const authMiddleware = (req, res, next) => {
   try {
-    const token = req.body.token;
+    const token = req.body.token || req.headers.authorization?.split(" ")[1];
 
-    console.log("Tokennnn : ", req.body);
+    console.log("Tokennnn : ", token);
     
 
     if (!token) {

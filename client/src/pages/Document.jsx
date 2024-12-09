@@ -4,6 +4,7 @@ import UploadIcon from "../../public/assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
 import { fetchDocuments } from "../utils/api";
 import axios from "../utils/axiosInstance";
+import Cookie from "js-cookie"
 
 const Document = () => {
   const [documents, setDocuments] = useState();
@@ -18,10 +19,14 @@ const Document = () => {
 
       const formData = new FormData();
       formData.append("file", file);
+
+      const token = Cookie.get("token");
+
       try {
         const uploadRes = await axios.post("/files/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
+             Authorization: `Bearer ${token}`
           },
         });
 

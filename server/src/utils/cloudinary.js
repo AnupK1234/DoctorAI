@@ -24,7 +24,7 @@ const upload = multer({ storage });
 // Controller for file upload
 const uploadFile = async (req, res) => {
   try {
-    const fileUrl = req.file.path;
+    const fileUrl = req?.file?.path;
 
     // console.log("File url : ", fileUrl);
     // console.log("File url : ", req.file);
