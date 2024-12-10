@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const authRoutes = require("./routes/v1/authRoutes");
 const fileRoutes = require("./routes/v1/fileRoutes");
+const elevenRoutes = require("./routes/v1/elevenLabRoutes")
 
 connectDB();
 
@@ -25,5 +26,6 @@ app.use(
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/files", fileRoutes);
+app.use("/api/v1/conversation", elevenRoutes);
 
 module.exports = app;

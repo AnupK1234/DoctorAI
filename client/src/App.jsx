@@ -4,13 +4,13 @@ import NotFound from "./components/NotFound";
 import useHomeLayout from "./hooks/useHomeLayout";
 import About from "./pages/About";
 import Avatar from "./pages/Avatar";
+import Avatar2 from "./pages/Avatar2";
 import Contact from "./pages/Contact";
 import Document from "./pages/Document";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Signup from "./pages/Signup";
-import Avatar2 from "./pages/Avatar2";
 
 const App = () => {
   return (
