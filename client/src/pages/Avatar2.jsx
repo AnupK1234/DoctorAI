@@ -1,5 +1,5 @@
 import React from 'react'
-import Conversation from '../components/ElevenLabsConvAI/conversation'
+import Conversation from '../components/ElevenLabsConvAI/Conversation'
 
 const Avatar2 = () => {
   return (
