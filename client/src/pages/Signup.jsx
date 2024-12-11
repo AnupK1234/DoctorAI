@@ -1,37 +1,45 @@
 import { useState } from "react";
-import FormInput from "../components/Inputs/FormInput";
-import GoogleButton from "../components/Auth/GoogleButton";
+import { useNavigate } from "react-router";
 import AuthLink from "../components/Auth/AuthLink";
+import FormInput from "../components/Inputs/FormInput";
 import axios from "../utils/axiosInstance";
-import {useNavigate} from "react-router"
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const referral = localStorage.getItem("ref") || "";
   const [error, setError] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+        
+    const passwordRegex =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
+    if (!passwordRegex.test(password)) {
+      setError(
+        "Password must be 8-20 characters long and include at least one letter, one number, and one special character"
+      );
+      return;
+    }
 
     try {
       const response = await axios.post("/auth/signup", {
         email,
         password,
-        name
+        name,
+        referral,
       });
-
-      //console.log("SignUp response : ", response);
-      if(response.status == 201) navigate("/login");
-      
+      if (response.status == 201) navigate("/login");
     } catch (error) {
-      // console.log("SignUp Error response : ", error);
       if (error.response && error.response.status === 400) {
-        setError("Password must be 8-20 characters long and include at least one letter, one number, and one special character");
+        setError(
+          "Password must be 8-20 characters long and include at least one letter, one number, and one special character"
+        );
       } else {
-        console.error(error); 
+        console.error(error);
       }
     }
   };

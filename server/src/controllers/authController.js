@@ -4,18 +4,8 @@ const { signToken, verifyToken } = require("../utils/jwtUtils");
 
 const signup = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
-
-    const passwordRegex =
-      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,20}$/;
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({
-        message:
-          "Password must be 8-20 characters long and include at least one letter, one number, and one special character",
-      });
-    }
-
-    const user = await User.create({ email, password, name });
+    const { email, password, name, referral } = req.body;
+    const user = await User.create({ email, password, name, referralCode: referral });
 
     res.status(201).json({
       message: "User created successfully",

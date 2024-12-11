@@ -2,8 +2,19 @@ import { Link } from "react-router";
 import Features from "../components/Features";
 import Testimonial from "../components/Testimonial";
 import Avatar from "./Avatar";
+import { useSearchParams } from "react-router";
+import { useEffect } from "react";
 
 const Home = () => {
+  const [searchParams] = useSearchParams();
+  const referredBy = searchParams.get("ref");
+
+  useEffect(() => {
+    if (referredBy && !localStorage.getItem("ref")) {
+      localStorage.setItem("ref", referredBy);
+    }
+  }, []);
+
   return (
     <>
       <div className="bg-white text-black">
@@ -19,7 +30,10 @@ const Home = () => {
               and receive personalized health insights.
             </p>
             <div className="flex justify-center md:justify-start gap-4">
-              <Link to="/avatar" className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition">
+              <Link
+                to="/avatar"
+                className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition"
+              >
                 Get Started
               </Link>
               <button className="bg-transparent border-2 border-blue-600 text-blue-600 font-bold py-2 px-6 rounded-lg hover:bg-blue-600 hover:text-white transition">
@@ -30,7 +44,7 @@ const Home = () => {
 
           {/* Image Section */}
           <div className="">
-            <Avatar/>
+            <Avatar />
           </div>
         </div>
 
