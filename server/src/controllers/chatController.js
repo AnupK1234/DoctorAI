@@ -37,8 +37,7 @@ const generateTitle = async (messages) => {
 const createConversation = async (req, res) => {
   try {
     const { userId } = req.body;
-    const title = await generateTitle([]);
-    const conversation = new Conversation({ userId, title });
+    const conversation = new Conversation({ userId, title: "Untitled Conversation" });
     await conversation.save();
     res.status(201).json(conversation);
   } catch (err) {

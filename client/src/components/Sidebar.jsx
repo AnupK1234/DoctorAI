@@ -58,7 +58,7 @@ const Sidebar = ({ setSidebarOpen }) => {
                     to="/avatar3"
                   >
                     <span className="flex-1 whitespace-nowrap px-3">
-                      ElevenLabs Simili Avatar
+                      11 Avatar
                     </span>
                   </Link>
                 </li>
@@ -69,6 +69,16 @@ const Sidebar = ({ setSidebarOpen }) => {
                   >
                     <span className="flex-1 whitespace-nowrap px-3">
                       Documents
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
+                    to="/chat"
+                  >
+                    <span className="flex-1 whitespace-nowrap px-3">
+                      Chat
                     </span>
                   </Link>
                 </li>
