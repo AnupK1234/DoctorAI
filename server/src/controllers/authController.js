@@ -8,28 +8,27 @@ const fs = require('fs')
 const signup = async (req, res) => {
   try {
     const { email, password, name, referral } = req.body;
-    
     const user = await User.create({ email, password, name, referralCode: referral });
-    
+
     // DocuSign API client setup
     const dsApiClient = new docusign.ApiClient();
     dsApiClient.setBasePath("https://demo.docusign.net/restapi");
     dsApiClient.addDefaultHeader("Authorization", `Bearer ${process.env.DS_ACCESS_TOKEN}`);
-    
+
     const envelopeApi = new docusign.EnvelopesApi(dsApiClient);
-    
+
     // Load the PDF document
     const pdfPath = path.resolve( __dirname, "../documents/Consent Form for Telehealth Consultation Final.pdf"); // Update to the correct path of your PDF
     const pdfBytes = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfBytes.toString("base64");
-    
+
     // Document configuration
     const document = new docusign.Document();
     document.documentBase64 = pdfBase64;
     document.name = "Consent Form for Telehealth Consultation";
     document.fileExtension = "pdf";
     document.documentId = "1";
-    
+
     // Signer configuration
     const signer = new docusign.Signer();
     signer.email = email;
@@ -38,15 +37,75 @@ const signup = async (req, res) => {
     signer.routingOrder = "1";
 
     // Signature tab
-    const signHere = new docusign.SignHere();
-    signHere.anchorString = "/sn1/"; // Ensure the placeholder exists in your document
-    signHere.anchorYOffset = "10";
-    signHere.anchorUnits = "pixels";
-    
-    const tabs = new docusign.Tabs();
-    tabs.signHereTabs = [signHere];
+    const signHere = new docusign.SignHere({
+      anchorString: "/sn1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+    });
+
+    // Name tab
+    const nameTab = new docusign.Text({
+      anchorString: "/name1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      font: "helvetica",
+      fontSize: "size12",
+      bold: true,
+      tabLabel: "Name",
+      value: name, // Pre-fills the name field
+    });
+
+    // Date of Birth tab
+    const dobTab = new docusign.Text({
+      anchorString: "/dob1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      font: "helvetica",
+      fontSize: "size12",
+      bold: true,
+      tabLabel: "DateOfBirth",
+    });
+
+    // Phone Number tab
+    const phoneTab = new docusign.Text({
+      anchorString: "/phone1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      font: "helvetica",
+      fontSize: "size12",
+      bold: true,
+      tabLabel: "Phone",
+    });
+
+    // Email tab
+    const emailTab = new docusign.Text({
+      anchorString: "/email1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      font: "helvetica",
+      fontSize: "size12",
+      bold: true,
+      tabLabel: "Email",
+      value: email, // Pre-fills the email field
+    });
+
+    // Date tab
+    const dateTab = new docusign.DateSigned({
+      anchorString: "/date1/",
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      tabLabel: "DateSigned",
+    });
+
+    // Combine all tabs
+    const tabs = new docusign.Tabs({
+      signHereTabs: [signHere],
+      textTabs: [nameTab, dobTab, phoneTab, emailTab],
+      dateSignedTabs: [dateTab],
+    });
+
     signer.tabs = tabs;
-    
+
     // Envelope definition
     const envelopeDefinition = new docusign.EnvelopeDefinition();
     envelopeDefinition.emailSubject = "Please sign this agreement document";
@@ -54,10 +113,9 @@ const signup = async (req, res) => {
     envelopeDefinition.recipients = {
       signers: [signer],
     };
-
-    
     envelopeDefinition.status = "sent";
-    
+
+    // Send the envelope
     const envelopeResult = await envelopeApi.createEnvelope(process.env.DS_ACCOUNT_ID, { envelopeDefinition });
 
     // Save the envelope ID to the user
@@ -69,13 +127,13 @@ const signup = async (req, res) => {
       user: { id: user._id, email, name },
     });
   } catch (error) {
-    
     res.status(400).json({
       message: "Error creating user",
       error: error.message,
     });
   }
 };
+
 
 const login = async (req, res) => {
   try {
