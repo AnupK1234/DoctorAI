@@ -98,9 +98,9 @@ const signup = async (req, res) => {
     });
 
     
-    const refTab = new docusign.Text({
-      anchorString: "/ref/", // Ensure this placeholder exists in the PDF
-      anchorYOffset: "10",
+    const refTab = new docusign.Text.constructFromObject({
+      anchorString: "Referred By: ", // Ensure this placeholder exists in the PDF
+      anchorXOffset: "50",
       anchorUnits: "pixels",
       font: "helvetica",
       fontSize: "size12",
@@ -111,7 +111,7 @@ const signup = async (req, res) => {
 
 
     // Combine all tabs
-    const tabs = new docusign.Tabs({
+    const tabs = new docusign.Tabs.constructFromObject({
       signHereTabs: [signHere],
       textTabs: [nameTab, dobTab, phoneTab, emailTab, refTab],
       dateSignedTabs: [dateTab],
