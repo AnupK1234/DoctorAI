@@ -8,6 +8,7 @@ const authRoutes = require("./routes/v1/authRoutes");
 const fileRoutes = require("./routes/v1/fileRoutes");
 const elevenRoutes = require("./routes/v1/elevenLabRoutes");
 const chatRoutes = require("./routes/v1/chatRoutes");
+const userRoutes = require("./routes/v1/userRoutes");
 const User = require("./models/User")
 
 connectDB();
@@ -30,6 +31,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/files", fileRoutes);
 app.use("/api/v1/conversation", elevenRoutes);
 app.use("/api/v1/chat", chatRoutes);
+app.use("/api/v1/users", userRoutes);
 app.post("/docusign-webhook", async (req, res) => {
   try {
     const { event, data } = req.body;

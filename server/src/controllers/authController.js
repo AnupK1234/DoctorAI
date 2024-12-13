@@ -18,7 +18,7 @@ const signup = async (req, res) => {
     const envelopeApi = new docusign.EnvelopesApi(dsApiClient);
 
     // Load the PDF document
-    const pdfPath = path.resolve( __dirname, "../documents/Consent Form for Telehealth Consultation Final.pdf"); // Update to the correct path of your PDF
+    const pdfPath = path.resolve( __dirname, "../documents/Consent Form2.pdf"); // Update to the correct path of your PDF
     const pdfBytes = fs.readFileSync(pdfPath);
     const pdfBase64 = pdfBytes.toString("base64");
 
@@ -97,13 +97,25 @@ const signup = async (req, res) => {
       tabLabel: "DateSigned",
     });
 
+    
+    const refTab = new docusign.Text({
+      anchorString: "/ref/", // Ensure this placeholder exists in the PDF
+      anchorYOffset: "10",
+      anchorUnits: "pixels",
+      font: "helvetica",
+      fontSize: "size12",
+      bold: true,
+      tabLabel: "ReferredBy",
+      value: referral, // Pre-fills the "Referred By" field with the referral value
+    });
+
+
     // Combine all tabs
     const tabs = new docusign.Tabs({
       signHereTabs: [signHere],
-      textTabs: [nameTab, dobTab, phoneTab, emailTab],
+      textTabs: [nameTab, dobTab, phoneTab, emailTab, refTab],
       dateSignedTabs: [dateTab],
     });
-
     signer.tabs = tabs;
 
     // Envelope definition
@@ -115,6 +127,9 @@ const signup = async (req, res) => {
     };
     envelopeDefinition.status = "sent";
 
+    // console.log("Envelope Definition:", JSON.stringify(envelopeDefinition, null, 2));
+
+    
     // Send the envelope
     const envelopeResult = await envelopeApi.createEnvelope(process.env.DS_ACCOUNT_ID, { envelopeDefinition });
 
@@ -127,6 +142,8 @@ const signup = async (req, res) => {
       user: { id: user._id, email, name },
     });
   } catch (error) {
+    console.log("ERRRR : ", error);
+    
     res.status(400).json({
       message: "Error creating user",
       error: error.message,

@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     referralCode: { type: String },
-    documentSigned: { type: Boolean, default: false }, // Track signing status
+    documentSigned: { type: Boolean, default: false },
     docusignEnvelopeId: { type: String },
   },
   { timestamps: true }
