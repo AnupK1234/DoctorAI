@@ -3,17 +3,19 @@ const User = require("../models/User");
 const { signToken, verifyToken } = require("../utils/jwtUtils");
 const docusign = require("docusign-esign");
 const path = require('path');
-const fs = require('fs')
+const fs = require('fs');
+const { getAccessToken } = require("./docuSignController");
 
 const signup = async (req, res) => {
   try {
     const { email, password, name, referral } = req.body;
     const user = await User.create({ email, password, name, referralCode: referral });
+    const accessToken = await getAccessToken();
 
     // DocuSign API client setup
     const dsApiClient = new docusign.ApiClient();
     dsApiClient.setBasePath("https://demo.docusign.net/restapi");
-    dsApiClient.addDefaultHeader("Authorization", `Bearer ${process.env.DS_ACCESS_TOKEN}`);
+    dsApiClient.addDefaultHeader("Authorization", `Bearer ${accessToken}`);
 
     const envelopeApi = new docusign.EnvelopesApi(dsApiClient);
 
@@ -37,83 +39,56 @@ const signup = async (req, res) => {
     signer.routingOrder = "1";
 
     // Signature tab
-    const signHere = new docusign.SignHere({
-      anchorString: "/sn1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
+    const signHere = new docusign.SignHere.constructFromObject({
+      anchorString: "Patient Signature:",
+      anchorXOffset: "1.5",
+      anchorUnits: "inches",
     });
 
     // Name tab
-    const nameTab = new docusign.Text({
-      anchorString: "/name1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
-      font: "helvetica",
+    const nameTab = new docusign.Text.constructFromObject({
+      anchorString: "Name:",
+      anchorXOffset: "1",
+      anchorUnits: "inches",
       fontSize: "size12",
-      bold: true,
       tabLabel: "Name",
-      value: name, // Pre-fills the name field
-    });
-
-    // Date of Birth tab
-    const dobTab = new docusign.Text({
-      anchorString: "/dob1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
-      font: "helvetica",
-      fontSize: "size12",
-      bold: true,
-      tabLabel: "DateOfBirth",
-    });
-
-    // Phone Number tab
-    const phoneTab = new docusign.Text({
-      anchorString: "/phone1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
-      font: "helvetica",
-      fontSize: "size12",
-      bold: true,
-      tabLabel: "Phone",
+      value: name,
     });
 
     // Email tab
-    const emailTab = new docusign.Text({
-      anchorString: "/email1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
-      font: "helvetica",
+    const emailTab = new docusign.Text.constructFromObject({
+      anchorString: "Email Address:",
+      anchorXOffset: "1",
+      anchorUnits: "inches",
       fontSize: "size12",
-      bold: true,
       tabLabel: "Email",
-      value: email, // Pre-fills the email field
+      value: email, 
     });
 
     // Date tab
-    const dateTab = new docusign.DateSigned({
-      anchorString: "/date1/",
-      anchorYOffset: "10",
-      anchorUnits: "pixels",
+    const dateTab = new docusign.DateSigned.constructFromObject({
+      anchorString: "Date:",
+      anchorXOffset: "1",
+      anchorUnits: "inches",
       tabLabel: "DateSigned",
     });
 
     
     const refTab = new docusign.Text.constructFromObject({
-      anchorString: "Referred By: ", // Ensure this placeholder exists in the PDF
+      anchorString: "Referred By: ",
       anchorXOffset: "50",
       anchorUnits: "pixels",
-      font: "helvetica",
       fontSize: "size12",
-      bold: true,
       tabLabel: "ReferredBy",
-      value: referral, // Pre-fills the "Referred By" field with the referral value
+      value: referral || "",
+      required: false
     });
 
 
     // Combine all tabs
     const tabs = new docusign.Tabs.constructFromObject({
       signHereTabs: [signHere],
-      textTabs: [nameTab, dobTab, phoneTab, emailTab, refTab],
+      textTabs: [nameTab, emailTab, refTab],
       dateSignedTabs: [dateTab],
     });
     signer.tabs = tabs;
