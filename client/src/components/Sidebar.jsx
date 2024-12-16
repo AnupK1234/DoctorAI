@@ -42,7 +42,7 @@ const Sidebar = ({ setSidebarOpen }) => {
             </li>
             {isLoggedIn && (
               <>
-                <li>
+                {/* <li>
                   <Link
                     className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                     to="/avatar"
@@ -51,14 +51,14 @@ const Sidebar = ({ setSidebarOpen }) => {
                       Avatar
                     </span>
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                     to="/eleven"
                   >
                     <span className="flex-1 whitespace-nowrap px-3">
-                      11 Avatar
+                      Avatar
                     </span>
                   </Link>
                 </li>

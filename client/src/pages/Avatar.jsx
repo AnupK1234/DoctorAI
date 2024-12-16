@@ -41,28 +41,29 @@ const Avatar = () => {
   return (
     <div className="min-h-screen flex flex-col items-center font-abc-repro font-normal text-sm text-white p-8">
       {showDottedFace && (
-        <div className="absolute bottom-[32px] right-[32px] flex gap-2">
-          <button
-            onClick={() => saveInteractionMode("regular")}
-            className={`px-4 py-2 rounded-[100px] font-abc-repro-mono focus:bg-simliblue focus:text-white focus:rounded-[100px] hover:rounded-sm hover:bg-white hover:text-black transition-all duration-300 ${
-              interactionMode === "regular"
-                ? "bg-simliblue"
-                : "bg-white bg-opacity-20"
-            }`}
-          >
-            <b>Regular</b>
-          </button>
-          <button
-            onClick={() => saveInteractionMode("pushToTalk")}
-            className={`px-4 py-2 rounded-[100px] font-abc-repro-mono focus:bg-simliblue focus:text-white focus:rounded-[100px] hover:rounded-sm hover:bg-white hover:text-black transition-all duration-300 ${
-              interactionMode === "pushToTalk"
-                ? "bg-simliblue"
-                : "bg-white bg-opacity-20"
-            }`}
-          >
-            <b>Push to Talk</b>
-          </button>
-        </div>
+        // <div className="absolute bottom-[32px] right-[32px] flex gap-2">
+        //   <button
+        //     onClick={() => saveInteractionMode("regular")}
+        //     className={`px-4 py-2 rounded-[100px] font-abc-repro-mono focus:bg-simliblue focus:text-white focus:rounded-[100px] hover:rounded-sm hover:bg-white hover:text-black transition-all duration-300 ${
+        //       interactionMode === "regular"
+        //         ? "bg-simliblue"
+        //         : "bg-white bg-opacity-20"
+        //     }`}
+        //   >
+        //     <b>Regular</b>
+        //   </button>
+        //   <button
+        //     onClick={() => saveInteractionMode("pushToTalk")}
+        //     className={`px-4 py-2 rounded-[100px] font-abc-repro-mono focus:bg-simliblue focus:text-white focus:rounded-[100px] hover:rounded-sm hover:bg-white hover:text-black transition-all duration-300 ${
+        //       interactionMode === "pushToTalk"
+        //         ? "bg-simliblue"
+        //         : "bg-white bg-opacity-20"
+        //     }`}
+        //   >
+        //     <b>Push to Talk</b>
+        //   </button>
+        // </div>
+        <></>
       )}
       <div className="flex flex-col items-center gap-6 bg-effect15White p-6 pb-[40px] rounded-xl w-full">
         <div>
