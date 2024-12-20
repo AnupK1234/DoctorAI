@@ -65,6 +65,16 @@ const Sidebar = ({ setSidebarOpen }) => {
                 <li>
                   <Link
                     className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
+                    to="/medical"
+                  >
+                    <span className="flex-1 whitespace-nowrap px-3">
+                      Medical
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className="flex items-center justify-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white font-bold text-[20px] tracking-[5px] leading-8 dark:hover:bg-black hover:opacity-70"
                     to="/upload-doc"
                   >
                     <span className="flex-1 whitespace-nowrap px-3">
