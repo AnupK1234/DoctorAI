@@ -4,43 +4,59 @@ import UploadIcon from "../../public/assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
 import { fetchDocuments } from "../utils/api";
 import axios from "../utils/axiosInstance";
-import Cookie from "js-cookie"
+import Cookie from "js-cookie";
+import { axiosInstance2 } from "../utils/axiosInstance";
+import FileUploadModal from "../components/Modals/FileUploadModal";
 
 const Document = () => {
   const [documents, setDocuments] = useState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size exceeds 5MB limit. Please choose a smaller file.");
-        return;
-      }
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
-      const formData = new FormData();
-      formData.append("file", file);
+  const handleFileUpload = async ({ pdfFile, imageFile }) => {
+    const formData = new FormData();
+    const token = Cookie.get("token");
+    let fileData;
 
-      const token = Cookie.get("token");
+    try {
+      // If PDF file exists, upload and parse
+      if (pdfFile) {
+        formData.append("file", pdfFile);
 
-      try {
         const uploadRes = await axios.post("/files/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
-        // Parsing pdf
-        if (uploadRes.status == 201) {
+        if (uploadRes.status === 201) {
           const parseRes = await axios.post("/files/parse", {
             file: uploadRes.data.file,
           });
+          fileData = uploadRes.data.file;
 
-          if(parseRes.status == 201) alert("Your file has been uploaded")
+          if (parseRes.status === 201) alert("Your PDF has been uploaded.");
         }
-      } catch (error) {
-        alert("Error uploading file")
-        console.log("Error in uploading file : ", error);
       }
+
+      // If Image file exists, upload to analyze route
+      if (imageFile) {
+        formData.append("image", imageFile);
+
+        const analyzeRes = await axiosInstance2.post("/analyze-image", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const updateRes = await axios.post("/files/img-analysis", {
+          fileData,
+          analyzeRes
+        });
+
+        if (analyzeRes.status === 200) alert("Your image has been uploaded.");
+      }
+    } catch (error) {
+      alert("Error uploading file(s). Please try again.");
+      console.error("Error in uploading files:", error);
     }
   };
 
@@ -56,29 +72,24 @@ const Document = () => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-white text-black py-10">
       <div className="w-full max-w-md">
+        {/* Upload Button */}
         <div className="flex flex-col items-center space-y-4">
-          <label
-            htmlFor="file-upload"
-            className="flex justify-center items-center cursor-pointer px-6 py-3 text-lg font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition"
+          <button
+            onClick={handleOpenModal}
+            className="flex justify-center items-center px-6 py-3 text-lg font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition"
           >
             <UploadIcon />
-            Upload PDF
-          </label>
+            Upload PDF / Image
+          </button>
           <p className="text-sm text-gray-500">
-            Please upload PDF less than 5MB
+            Please upload files less than 5MB
           </p>
-          <input
-            id="file-upload"
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
         </div>
 
+        {/* Accordion for Documents */}
         <div className="mt-10">
           {documents &&
-            documents?.map((doc, index) => (
+            documents.map((doc, index) => (
               <Accordion key={doc._id} title={doc.title}>
                 <p>
                   <strong>Date:</strong> {doc.createdAt}
@@ -99,6 +110,13 @@ const Document = () => {
             ))}
         </div>
       </div>
+
+      {/* Modal for File Upload */}
+      <FileUploadModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleFileUpload}
+      />
     </div>
   );
 };

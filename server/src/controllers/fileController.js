@@ -87,4 +87,23 @@ const getAllDocuments = async (req, res) => {
   }
 };
 
-module.exports = { parseCloudinaryPDF, getAllDocuments };
+const updateImgAnalysis = async (req, res) => {
+  try {
+    const { fileData, analyzeRes } = req.body;
+
+    // console.log("File data is : ", fileData);
+    // console.log("Analysze is : ", analyzeRes);
+
+    const documents = await File.findOneAndUpdate(
+      { _id: fileData._id },
+      { imgAnalysis: analyzeRes.data.result },
+      { new: true }
+    );
+
+    res.status(201).send(documents);
+  } catch (error) {
+    console.log("Error fetching documents : ", error);
+  }
+};
+
+module.exports = { parseCloudinaryPDF, getAllDocuments, updateImgAnalysis };
