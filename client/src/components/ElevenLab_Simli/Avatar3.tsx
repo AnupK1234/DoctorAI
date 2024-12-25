@@ -1,6 +1,7 @@
 import SimliElevenlabs from "./SimliElevenlabs";
 import React, { useState } from "react";
 import DottedFace from "./DottedFace";
+import { AGENT_ID } from "../../constants/keys";
 
 interface avatarSettings {
   elevenlabs_agentid: string;
@@ -9,7 +10,7 @@ interface avatarSettings {
 
 // Customize your avatar here
 const avatar: avatarSettings = {
-  elevenlabs_agentid: "Qb4G8MrN8FoquWtnvhJS",
+  elevenlabs_agentid: AGENT_ID,
   simli_faceid: "5514e24d-6086-46a3-ace4-6a7264e5cb7c",
 };
 
