@@ -37,7 +37,7 @@ const Medical = () => {
           className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
           onClick={() => setActiveComponent("avatar")}
         >
-          Avatar
+          Talk
         </button>
       </div>
 

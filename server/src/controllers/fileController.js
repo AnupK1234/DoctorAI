@@ -3,6 +3,7 @@ const axios = require("axios");
 const Groq = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const File = require("../models/File");
+const { cloudinary } = require("../utils/cloudinary");
 
 const parseCloudinaryPDF = async (req, res) => {
   try {
@@ -106,4 +107,41 @@ const updateImgAnalysis = async (req, res) => {
   }
 };
 
-module.exports = { parseCloudinaryPDF, getAllDocuments, updateImgAnalysis };
+const deleteDocById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const document = await File.findById(id);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // Extract the public_id from the Cloudinary URL
+    const cloudinaryUrl = document.fileUrl;
+    const fileNameWithExtension = cloudinaryUrl.split("/").pop();
+    const fileName = fileNameWithExtension.split(".")[0];
+    const publicId = `health_reports/${fileName}`;
+
+    // Delete the file from Cloudinary
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result !== "ok") {
+      console.error("Cloudinary deletion error:", result);
+      return res
+        .status(500)
+        .json({ message: "Failed to delete file from Cloudinary" });
+    }
+
+    await File.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Document deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    res.status(500).json({ message: "Failed to delete document" });
+  }
+};
+
+module.exports = {
+  parseCloudinaryPDF,
+  getAllDocuments,
+  updateImgAnalysis,
+  deleteDocById,
+};

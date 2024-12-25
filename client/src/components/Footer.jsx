@@ -60,7 +60,7 @@ const Footer = () => {
             </div>
             <div className="mt-16">
               <p className="text-base font-medium">
-                Sign up for DoctorAi news:
+                Sign up for Universa Doctor news:
               </p>
               <form className="w-[300px] mt-6 email-newsletter">
                 <div className="flex">
@@ -92,7 +92,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-center my-4 text-base text-center font-medium">
-          <p>All Rights Reserved © Copyright DoctorAi</p>
+          <p>All Rights Reserved © Copyright Universa Doctor</p>
           <span className="hidden md:block">&nbsp;|&nbsp;</span>
           <a className="underline" href="/privacy-policy/">
             Privacy Policy

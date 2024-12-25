@@ -1,12 +1,12 @@
+import Cookie from "js-cookie";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { toast } from "react-toastify";
 import UploadIcon from "../../public/assets/svg/UploadIcon";
 import Accordion from "../components/misc/Accordion";
-import { fetchDocuments } from "../utils/api";
-import axios from "../utils/axiosInstance";
-import Cookie from "js-cookie";
-import { axiosInstance2 } from "../utils/axiosInstance";
 import FileUploadModal from "../components/Modals/FileUploadModal";
+import { fetchDocuments } from "../utils/api";
+import axios, { axiosInstance2 } from "../utils/axiosInstance";
 
 const Document = () => {
   const [documents, setDocuments] = useState();
@@ -35,7 +35,7 @@ const Document = () => {
           });
           fileData = uploadRes.data.file;
 
-          if (parseRes.status === 201) alert("Your PDF has been uploaded.");
+          if (parseRes.status === 201) toast.success("Your PDF has been uploaded.");
         }
       }
 
@@ -49,14 +49,29 @@ const Document = () => {
 
         const updateRes = await axios.post("/files/img-analysis", {
           fileData,
-          analyzeRes
+          analyzeRes,
         });
 
-        if (analyzeRes.status === 200) alert("Your image has been uploaded.");
+        if (analyzeRes.status === 200) toast.success("Your image has been uploaded.");
       }
     } catch (error) {
-      alert("Error uploading file(s). Please try again.");
+      toast.error("Error uploading file(s). Please try again.");
       console.error("Error in uploading files:", error);
+    }
+  };
+
+  const handleDelete = async (docId) => {
+    try {
+      const response = await axios.delete(`/files/${docId}`);
+      if (response.status === 200) {
+        toast.success("Document deleted successfully.");
+        setDocuments((prevDocs) =>
+          prevDocs.filter((doc) => doc._id !== docId)
+        );
+      }
+    } catch (error) {
+      toast.error("Failed to delete the document.");
+      console.error("Error in deleting document:", error);
     }
   };
 
@@ -106,6 +121,15 @@ const Document = () => {
                 <p>
                   <strong>Summary:</strong> {doc.summary}
                 </p>
+                <p>
+                  <strong>Image Analysis:</strong> {doc?.imgAnalysis || ""}
+                </p>
+                <button
+                  onClick={() => handleDelete(doc._id)}
+                  className="mt-4 px-4 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                >
+                  Delete Document
+                </button>
               </Accordion>
             ))}
         </div>

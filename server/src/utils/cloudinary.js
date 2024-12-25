@@ -55,4 +55,4 @@ const uploadFile = async (req, res) => {
   }
 };
 
-module.exports = { upload, uploadFile };
+module.exports = { upload, uploadFile, cloudinary };

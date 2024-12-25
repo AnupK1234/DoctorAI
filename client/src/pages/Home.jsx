@@ -42,7 +42,26 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Image Section */}
+          {/* Button Section */}
+          <div className="flex flex-col items-center justify-center gap-4 lg:h-full lg:mb-52 mt-10 md:mt-0">
+            <Link to="/eleven">
+              <button className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition w-40">
+                Talk
+              </button>
+            </Link>
+            <Link to="/chat">
+              <button className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition w-40">
+                Chat
+              </button>
+            </Link>
+            <Link to="/upload-doc">
+              <button className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition w-40">
+                Upload Document
+              </button>
+            </Link>
+          </div>
+
+          {/* Avatar Section */}
           <div className="">
             <Avatar />
           </div>

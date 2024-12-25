@@ -40,7 +40,7 @@ const Navbar = () => {
 
         {/* Center Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="text-white text-3xl font-bold">DoctorAI</h1>
+          <h1 className="text-white text-3xl font-bold">Universa Doctor</h1>
         </div>
 
         {/* Login Button or User Avatar */}
