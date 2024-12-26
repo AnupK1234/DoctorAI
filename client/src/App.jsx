@@ -31,8 +31,8 @@ const App = () => {
         <Route path="/about" element={useHomeLayout(About)} />
         <Route path="/avatar2" element={useHomeLayout(Avatar2)} />
         <Route path="/avatar3" element={useHomeLayout(Avatar3)} />
-        <Route path="/chat" element={useHomeLayout(Chat)} />
-        <Route path="/eleven" element={useHomeLayout(Eleven)} />
+        <Route path="/chat" element={<ProtectedRoute element={useHomeLayout(Chat)} />} />
+        <Route path="/eleven" element={<ProtectedRoute element={useHomeLayout(Eleven)} />} />
         <Route path="/medical" element={useHomeLayout(Medical)} />
         <Route path="/admin" element={useHomeLayout(Admin)} />
         <Route
