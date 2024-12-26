@@ -43,7 +43,7 @@ const Document = () => {
       if (imageFile) {
         formData.append("image", imageFile);
 
-        const analyzeRes = await axiosInstance2.post("/analyze-image", formData, {
+        const analyzeRes = await axiosInstance2.post("/analyze-swarm", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 

@@ -15,3 +15,5 @@ dist/
 /doctorai
 anupDoc.md
 .env
+/agent_workspace
+reports/*
