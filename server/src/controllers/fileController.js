@@ -127,21 +127,34 @@ const deleteDocById = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Extract the public_id from the Cloudinary URL
-    const cloudinaryUrl = document.fileUrl;
-    const fileNameWithExtension = cloudinaryUrl.split("/").pop();
-    const fileName = fileNameWithExtension.split(".")[0];
-    const publicId = `health_reports/${fileName}`;
+    const deleteFromCloudinary = async (url, folder) => {
+      if (url) {
+        const fileNameWithExtension = url.split("/").pop();
+        const fileName = fileNameWithExtension.split(".")[0];
+        const publicId = `${folder}/${fileName}`;
 
-    // Delete the file from Cloudinary
-    const result = await cloudinary.uploader.destroy(publicId);
-    if (result.result !== "ok") {
-      console.error("Cloudinary deletion error:", result);
+        const result = await cloudinary.uploader.destroy(publicId);
+        if (result.result !== "ok") {
+          console.error(`Cloudinary deletion error for ${folder}:`, result);
+          throw new Error(`Failed to delete ${folder} from Cloudinary`);
+        }
+      }
+    };
+
+    // Attempt to delete both fileUrl and imageUrl
+    try {
+      await Promise.all([
+        deleteFromCloudinary(document.fileUrl, "health_reports"),
+        deleteFromCloudinary(document.imageUrl, "health_reports"),
+      ]);
+    } catch (cloudinaryError) {
+      console.error("Error deleting from Cloudinary:", cloudinaryError.message);
       return res
         .status(500)
-        .json({ message: "Failed to delete file from Cloudinary" });
+        .json({ message: "Failed to delete resources from Cloudinary" });
     }
 
+    // Delete the document from the database
     await File.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Document deleted successfully" });
@@ -150,6 +163,7 @@ const deleteDocById = async (req, res) => {
     res.status(500).json({ message: "Failed to delete document" });
   }
 };
+
 
 module.exports = {
   parseCloudinaryPDF,
