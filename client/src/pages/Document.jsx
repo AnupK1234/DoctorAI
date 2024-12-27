@@ -35,24 +35,36 @@ const Document = () => {
           });
           fileData = uploadRes.data.file;
 
-          if (parseRes.status === 201) toast.success("Your PDF has been uploaded.");
+          if (parseRes.status === 201)
+            toast.success("Your PDF has been uploaded.");
         }
       }
 
       // If Image file exists, upload to analyze route
       if (imageFile) {
-        formData.append("image", imageFile);
+        formData.set("file", imageFile);
 
-        const analyzeRes = await axiosInstance2.post("/analyze-swarm", formData, {
+        const imgUploadRes = await axios.post("/files/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+
+        formData.append("image", imageFile);
+        const analyzeRes = await axiosInstance2.post(
+          "/analyze-swarm",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
         const updateRes = await axios.post("/files/img-analysis", {
           fileData,
           analyzeRes,
+          imageData: imgUploadRes?.data?.imageUrl || "",
         });
 
-        if (analyzeRes.status === 200) toast.success("Your image has been uploaded.");
+        if (analyzeRes.status === 200)
+          toast.success("Your image has been uploaded.");
       }
     } catch (error) {
       toast.error("Error uploading file(s). Please try again.");
@@ -65,9 +77,7 @@ const Document = () => {
       const response = await axios.delete(`/files/${docId}`);
       if (response.status === 200) {
         toast.success("Document deleted successfully.");
-        setDocuments((prevDocs) =>
-          prevDocs.filter((doc) => doc._id !== docId)
-        );
+        setDocuments((prevDocs) => prevDocs.filter((doc) => doc._id !== docId));
       }
     } catch (error) {
       toast.error("Failed to delete the document.");
@@ -114,15 +124,30 @@ const Document = () => {
                 </p>
                 <p>
                   <strong>Document Link:</strong>{" "}
-                  <Link to={doc.fileUrl} className="text-blue-500 font-bold">
-                    Link
-                  </Link>
+                  {doc.fileUrl && (
+                    <Link
+                      to={doc?.fileUrl || ""}
+                      className="text-blue-500 font-bold"
+                    >
+                      1. Document Link {"  "}
+                    </Link>
+                  )}
+                  {doc.imageUrl && (
+                    <Link
+                      to={doc?.imageUrl || ""}
+                      className="text-blue-500 font-bold"
+                    >
+                      2. Image Link
+                    </Link>
+                  )}
                 </p>
                 <p>
-                  <strong>Summary:</strong> {doc?.summary || "No Document summary available"}
+                  <strong>Summary:</strong>{" "}
+                  {doc?.summary || "No Document summary available"}
                 </p>
                 <p>
-                  <strong>Image Analysis:</strong> {doc?.imgAnalysis || "No Image Analysis available"}
+                  <strong>Image Analysis:</strong>{" "}
+                  {doc?.imgAnalysis || "No Image Analysis available"}
                 </p>
                 <button
                   onClick={() => handleDelete(doc._id)}

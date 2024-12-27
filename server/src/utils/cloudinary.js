@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "health_reports",
-    allowed_formats: ["pdf"],
+    allowed_formats: ["pdf", "jpeg", "jpg", "png"],
   },
 });
 
@@ -25,26 +25,25 @@ const upload = multer({ storage });
 const uploadFile = async (req, res) => {
   try {
     const fileUrl = req?.file?.path;
-        
-    const newFile = await File.create({
-      user: req.user.id,
-      fileUrl,
-    });
 
-    res.status(201).json({
-      success: true,
-      message: "File uploaded successfully",
-      file: newFile,
-    });
+    if (req?.file?.mimetype.startsWith("image/")) {
+      res.status(201).json({
+        success: true,
+        message: "File uploaded successfully",
+        imageUrl: fileUrl,
+      });
+    } else {
+      const newFile = await File.create({
+        user: req.user.id,
+        fileUrl,
+      });
 
-    /***
-     * const pdf = parsePdf()
-     * const rawData = pdf;
-     * 
-     * pass rawData to GPT -> Get title from this data and summarize the data
-     * 
-     */
-
+      res.status(201).json({
+        success: true,
+        message: "File uploaded successfully",
+        file: newFile,
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({

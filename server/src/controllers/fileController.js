@@ -90,7 +90,7 @@ const getAllDocuments = async (req, res) => {
 
 const updateImgAnalysis = async (req, res) => {
   try {
-    const { fileData, analyzeRes } = req.body;
+    const { fileData, analyzeRes, imageData } = req.body;
 
     let document;
 
@@ -98,12 +98,13 @@ const updateImgAnalysis = async (req, res) => {
       document = await File.create({
         title: analyzeRes.data.result.substring(0, 50),
         imgAnalysis: analyzeRes.data.result,
-        user: req.user.id
+        user: req.user.id,
+        imageUrl: imageData
       });
     } else {
       document = await File.findOneAndUpdate(
         { _id: fileData._id },
-        { imgAnalysis: analyzeRes.data.result },
+        { imgAnalysis: analyzeRes.data.result, imageUrl: imageData },
         { new: true }
       );
     }
