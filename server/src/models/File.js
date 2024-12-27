@@ -6,7 +6,7 @@ const fileSchema = new mongoose.Schema(
     summary: { type: String },
     imgAnalysis: { type: String },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    fileUrl: { type: String, required: true },
+    fileUrl: { type: String },
   },
   { timestamps: true }
 );

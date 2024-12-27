@@ -92,20 +92,31 @@ const updateImgAnalysis = async (req, res) => {
   try {
     const { fileData, analyzeRes } = req.body;
 
-    // console.log("File data is : ", fileData);
-    // console.log("Analysze is : ", analyzeRes);
+    let document;
 
-    const documents = await File.findOneAndUpdate(
-      { _id: fileData._id },
-      { imgAnalysis: analyzeRes.data.result },
-      { new: true }
-    );
+    if (!fileData || !fileData._id) {
+      document = await File.create({
+        title: analyzeRes.data.result.substring(0, 50),
+        imgAnalysis: analyzeRes.data.result,
+        user: req.user.id
+      });
+    } else {
+      document = await File.findOneAndUpdate(
+        { _id: fileData._id },
+        { imgAnalysis: analyzeRes.data.result },
+        { new: true }
+      );
+    }
 
-    res.status(201).send(documents);
+    res.status(201).send(document);
   } catch (error) {
-    console.log("Error fetching documents : ", error);
+    console.log("Error fetching or creating documents: ", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while processing the request" });
   }
 };
+
 
 const deleteDocById = async (req, res) => {
   try {

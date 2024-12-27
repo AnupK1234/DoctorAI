@@ -119,10 +119,10 @@ const Document = () => {
                   </Link>
                 </p>
                 <p>
-                  <strong>Summary:</strong> {doc.summary}
+                  <strong>Summary:</strong> {doc?.summary || "No Document summary available"}
                 </p>
                 <p>
-                  <strong>Image Analysis:</strong> {doc?.imgAnalysis || ""}
+                  <strong>Image Analysis:</strong> {doc?.imgAnalysis || "No Image Analysis available"}
                 </p>
                 <button
                   onClick={() => handleDelete(doc._id)}
