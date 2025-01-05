@@ -23,16 +23,23 @@ const askAI = async (conversationHistory, input) => {
 };
 
 const generateTitle = async (messages) => {
-  const lastMessage = messages[messages.length - 1]?.content || "Chat";
+  const messageContent = messages.map(msg => msg.content).join(" ");
   const titleResponse = await groq.chat.completions.create({
     model: "llama3-8b-8192",
     messages: [
-      { role: "system", content: "Generate a concise and relevant title for this conversation." },
-      { role: "user", content: lastMessage },
+      { role: "system", content: "Analyze the following conversation messages and determine if the topic is medically related. If it is, generate a concise and professional title summarizing the conversation's main context. If not, return 'false'. Format your response as: {\"title\": \"<title or false>\"}." },
+      { role: "user", content: messageContent },
     ],
   });
-  return titleResponse.choices[0].message.content || "Untitled Conversation";
+  try {
+    const aiResponse = JSON.parse(titleResponse.choices[0]?.message?.content);
+    return aiResponse.title || "false";
+  } catch (error) {
+    console.error("Error parsing AI response:", error);
+    return "false";
+  }
 };
+
 
 const createConversation = async (req, res) => {
   try {
@@ -65,13 +72,15 @@ const addMessage = async (req, res) => {
 
     // Update conversation title if this is the first message
     const conversation = await Conversation.findById(conversationId);
-    if (conversation && !conversation.title) {
-      const allMessages = await Message.find({ conversationId }).sort({ createdAt: 1 });
-      conversation.title = await generateTitle(allMessages);
-      await conversation.save();
+    if (conversation && conversation.title === "Untitled Conversation") {      
+      const allMessages = await Message.find({ conversationId, sender: { $ne: null }}).sort({ createdAt: 1 });
+      const newTitle = await generateTitle(allMessages);
+      if (newTitle && newTitle !== "false") {
+        conversation.title = newTitle;
+        await conversation.save();
+      }
     }
-
-    res.status(201).json({ userMessage, botMessage });
+    res.status(201).json({ userMessage, botMessage, conversationTitle: conversation.title });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

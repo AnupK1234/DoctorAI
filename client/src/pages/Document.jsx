@@ -67,7 +67,7 @@ const Document = () => {
           toast.success("Your image has been uploaded.");
       }
     } catch (error) {
-      toast.error("Error uploading file(s). Please try again.");
+      // toast.error("Error uploading file(s). Please try again.");
       console.error("Error in uploading files:", error);
     }
   };

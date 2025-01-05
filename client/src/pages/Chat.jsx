@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "../utils/axiosInstance";
 import Cookie from "js-cookie";
+import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash } from "react-icons/fi";
+import axios from "../utils/axiosInstance";
 
 const Chat = () => {
   const [conversations, setConversations] = useState([]);
@@ -12,7 +12,7 @@ const Chat = () => {
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [selectedConversation]);
 
   const fetchConversations = () => {
     axios
@@ -51,7 +51,7 @@ const Chat = () => {
 
   const startNewConversation = () => {
     axios
-      .post("/chat/conversations", { userId: user._id, title: "New Conversation" })
+      .post("/chat/conversations", { userId: user._id })
       .then((res) => {
         fetchConversations();
         loadConversation(res.data);
@@ -68,6 +68,14 @@ const Chat = () => {
       })
       .then((res) => {
         setMessages([...messages, res.data.userMessage, res.data.botMessage]);
+        if (res.data.conversationTitle !== "Untitled Conversation") {          
+          setSelectedConversation((selectedConversation) => {
+            return {
+              ...selectedConversation,
+              title: res.data.conversationTitle,
+            };
+          });
+        }
         setInput("");
       })
       .catch((err) => console.error(err));
@@ -98,7 +106,7 @@ const Chat = () => {
               }`}
             >
               <span className="truncate flex-1">
-                {conv.title.length > 20 ? `${conv.title.slice(0, 20)}...` : conv.title}
+                {conv.title.length > 20 ? `${conv.title}...` : conv.title}
               </span>
               <div className="flex items-center gap-2">
                 <FiEdit
@@ -113,7 +121,11 @@ const Chat = () => {
                   className="text-gray-500 cursor-pointer hover:text-red-500"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (window.confirm("Are you sure you want to delete this conversation?")) {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to delete this conversation?"
+                      )
+                    ) {
                       deleteConversation(conv._id);
                     }
                   }}
@@ -166,7 +178,9 @@ const Chat = () => {
           </div>
         ) : (
           <div className="h-full flex items-center justify-center">
-            <p className="text-gray-500">Select or create a conversation to begin chatting.</p>
+            <p className="text-gray-500">
+              Select or create a conversation to begin chatting.
+            </p>
           </div>
         )}
       </div>
