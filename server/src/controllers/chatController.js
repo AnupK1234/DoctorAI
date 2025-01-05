@@ -1,7 +1,7 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const Groq = require("groq-sdk");
-
+const axios = require('axios');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const askAI = async (conversationHistory, input) => {
@@ -14,12 +14,36 @@ const askAI = async (conversationHistory, input) => {
 
   messages.push({ role: "user", content: input });
 
-  const response = await groq.chat.completions.create({
-    model: "llama3-8b-8192",
-    messages,
-  });
-
-  return response.choices[0].message.content;
+  
+  /** Use of Biomistral for chatting */
+  const messagesCopy = messages.slice(1);
+  const OPENAI_API_URL = process.env.OPENAI_API_URL;
+  const config = {
+    method: 'post',
+    url: OPENAI_API_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    data: {
+      model: 'repository' || 'gpt-4',
+      messages: messagesCopy,
+      stream: false,
+    },
+    responseType: 'json',
+  };
+  
+  const openAIResponse = await axios(config);
+  // console.log("BIO reply : ", openAIResponse.data.choices[0].message);
+  return openAIResponse.data.choices[0].message.content;
+  
+  // Use of GROQ for chatting
+  // const response = await groq.chat.completions.create({
+  //   model: "llama3-8b-8192",
+  //   messages,
+  // });
+  // console.log("GROQ reply : ", response.choices[0].message.content);
+  // return response.choices[0].message.content;
 };
 
 const generateTitle = async (messages) => {
