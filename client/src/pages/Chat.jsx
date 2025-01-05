@@ -9,6 +9,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const user = JSON.parse(Cookie.get("userObject") || null);
+  const [showButtons, setShowButtons] = useState(false);
 
   useEffect(() => {
     fetchConversations();
@@ -67,18 +68,56 @@ const Chat = () => {
         content: input,
       })
       .then((res) => {
-        setMessages([...messages, res.data.userMessage, res.data.botMessage]);
-        if (res.data.conversationTitle !== "Untitled Conversation") {          
-          setSelectedConversation((selectedConversation) => {
-            return {
-              ...selectedConversation,
-              title: res.data.conversationTitle,
-            };
-          });
+        const newMessages = [...messages, res.data.userMessage, res.data.botMessage];
+        setMessages(newMessages);
+
+        // Add prompt and buttons after the first chatbot message
+        if (newMessages.length === 2) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: null,
+              content: "Would you like to create a Node?",
+              options: true, // Indicate this message has buttons
+            },
+          ]);
+        }
+
+        if (res.data.conversationTitle !== "Untitled Conversation") {
+          setSelectedConversation((selectedConversation) => ({
+            ...selectedConversation,
+            title: res.data.conversationTitle,
+          }));
         }
         setInput("");
       })
       .catch((err) => console.error(err));
+  };
+
+  const handleButtonClick = (response) => {
+    if (response === "yes") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: null,
+          content: (
+            <>
+              Link to the node:{" "}
+              <a
+                href="https://abcd.com/createNode"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                https://abcd.com/createNode
+              </a>
+            </>
+          ),
+        },
+      ]);
+    }
+    setShowButtons(state => !state);
+    // No need to do anything for "No"
   };
 
   return (
@@ -144,8 +183,8 @@ const Chat = () => {
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`flex mb-4 ${
-                    msg.sender ? "justify-end" : "justify-start"
+                  className={`flex flex-col mb-4 ${
+                    msg.sender ? "items-end" : "items-start"
                   }`}
                 >
                   <div
@@ -157,6 +196,22 @@ const Chat = () => {
                   >
                     {msg.content}
                   </div>
+                  {!showButtons && msg.options && (
+                    <div className="flex gap-4 mt-2">
+                      <button
+                        onClick={() => handleButtonClick("yes")}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => handleButtonClick("no")}
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      >
+                        No
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
