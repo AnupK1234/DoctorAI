@@ -10,6 +10,7 @@ const fileRoutes = require("./routes/v1/fileRoutes");
 const elevenRoutes = require("./routes/v1/elevenLabRoutes");
 const chatRoutes = require("./routes/v1/chatRoutes");
 const userRoutes = require("./routes/v1/userRoutes");
+const analysisRoutes = require("./routes/v1/analysisRoute");
 const User = require("./models/User")
 const Groq = require("groq-sdk");
 
@@ -36,6 +37,7 @@ app.use("/api/v1/files", fileRoutes);
 app.use("/api/v1/conversation", elevenRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/analysis", analysisRoutes)
 app.post("/docusign-webhook", async (req, res) => {
   try {
     const { event, data } = req.body;
@@ -66,6 +68,7 @@ app.post("/docusign-webhook", async (req, res) => {
     res.status(500).send("Error processing webhook.");
   }
 });
+
 
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
 app.post('/eleven/v1/chat/completions1', async (req, res) => {
