@@ -48,14 +48,18 @@ const Document = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        formData.append("image", imageFile);
-        const analyzeRes = await axiosInstance2.post(
-          "/analyze-swarm",
+        // formData.append("image", imageFile);
+        console.log("Fomr dat : ", formData);
+        
+        const analyzeRes = await axios.post(
+          "/analysis/analyze-img-gemini",
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
+
+        console.log("Ana : ", analyzeRes)
 
         const updateRes = await axios.post("/files/img-analysis", {
           fileData,

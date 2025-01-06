@@ -104,7 +104,15 @@ const addMessage = async (req, res) => {
         await conversation.save();
       }
     }
-    res.status(201).json({ userMessage, botMessage, conversationTitle: conversation.title });
+    res.status(201).json({ userMessage, botMessage, conversationTitle: conversation.title }); // also send if node question T/F
+    /**
+     * Has the user problems satisfied?
+     * In db store the state of node question : T/F
+     *  IF false then ask groq: 
+     *    if satisfied then: change F to T. Add new question to conversation "Would you like to create a node?"
+     *    
+     *    Make usetimeout in FE of 5sec
+     */
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
