@@ -5,6 +5,8 @@ const conversationSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String },
+    nodeState: {type: Boolean, default: false}
+
   },
   { timestamps: true }
 );

@@ -55,7 +55,7 @@ const analyzeImageGemini = async (req, res) => {
     // console.log("File : ", req.file);
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp" also works
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
 
     // Create image part from buffer
     const imagePart = {
