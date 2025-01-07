@@ -3,6 +3,8 @@ const Message = require("../models/Message");
 const Groq = require("groq-sdk");
 const axios = require("axios");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require('fs');
 
 const askAI = async (conversationHistory, input) => {
   const messages = conversationHistory.map((msg) => ({
@@ -135,31 +137,31 @@ const addMessage = async (req, res) => {
      *    Make usetimeout in FE of 5sec
      */
     let newMessage = null;
-    if (!conversation.nodeState) {
-      const groqMessages = [
-        ...conversationHistory.map((msg) => ({
-          role: msg.sender ? "user" : "assistant",
-          content: msg.content,
-        })),
-        { role: "user", content },
-        { role: "assistant", content: response },
-      ];
-      const isSatisfied = await askGroq(groqMessages);
-      console.log("Is satisfied : ", isSatisfied);
+    // if (!conversation.nodeState) {
+    //   const groqMessages = [
+    //     ...conversationHistory.map((msg) => ({
+    //       role: msg.sender ? "user" : "assistant",
+    //       content: msg.content,
+    //     })),
+    //     { role: "user", content },
+    //     { role: "assistant", content: response },
+    //   ];
+    //   const isSatisfied = await askGroq(groqMessages);
+    //   console.log("Is satisfied : ", isSatisfied);
       
-      // if (isSatisfied) {
-      //   // Update `nodeState` to true
-      //   conversation.nodeState = true;
+    //   // if (isSatisfied) {
+    //   //   // Update `nodeState` to true
+    //   //   conversation.nodeState = true;
 
-      //   // Add a new message to the conversation
-      //   newMessage = new Message({
-      //     conversationId,
-      //     sender: null,
-      //     content: "Would you like to create a node?",
-      //   });
-      //   await newMessage.save();
-      // }
-    }
+    //   //   // Add a new message to the conversation
+    //   //   newMessage = new Message({
+    //   //     conversationId,
+    //   //     sender: null,
+    //   //     content: "Would you like to create a node?",
+    //   //   });
+    //   //   await newMessage.save();
+    //   // }
+    // }
     // await conversation.save();
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -254,6 +256,72 @@ const deleteConversation = async (req, res) => {
   }
 };
 
+const chatImgAnalysis = async (req, res) => {
+  try {
+    const fileUrl = req?.file?.path;
+
+    // console.log("File url : ", fileUrl);
+    // console.log("Fileee : ", req.file)
+
+    const imgBuffer = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+    const base64Image = Buffer.from(imgBuffer.data).toString('base64');
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
+
+    // Create image part from buffer
+    const imagePart = {
+      inlineData: {
+        data: base64Image,
+        mimeType: req.file.mimetype,
+      },
+    };
+
+    const prompt = `You are an expert radiologist specializing in advanced medical imaging analysis. Your core competencies include:
+                    - Detailed interpretation of X-rays, CT scans, MRI, PET scans, ultrasound, and nuclear medicine imaging
+                    - Recognition of subtle pathological patterns and anatomical variations
+                    - Systematic review methodology following ACR reporting guidelines
+                    - Expertise in both common and rare radiological findings
+                    - Advanced understanding of imaging artifacts and technical quality assessment
+
+                    For each image analysis:
+                    1. Systematically evaluate technical quality and positioning
+                    2. Apply structured reporting frameworks
+                    3. Document all findings with precise anatomical localization
+                    4. Note both primary findings and incidental observations
+                    5. Compare with prior studies when available
+                    6. Consider clinical context in interpretation
+    
+                    Maintain strict adherence to radiation safety principles and ALARA guidelines while providing comprehensive, accurate interpretations.`;
+
+    const response = await model.generateContent([prompt, imagePart]);
+    const result = await response.response.text();
+    
+    const { conversationId, sender, content } = req.body;
+
+    const userMessage = new Message({ conversationId, sender, content, fileUrl });
+    await userMessage.save();
+    
+    const botMessage = new Message({
+      conversationId,
+      sender: null, // null sender implies AI chatbot
+      content: result,
+    });
+    await botMessage.save();
+    
+    res.status(200).json({message: "Image Upload/Analysis success", content: result})
+  } catch (error) {
+    console.log("Error Uploading/Analyzing Image : ", error)
+    res.status(500).json({
+      message: "Error Uploading/Analyzing Image",
+    });
+  }
+}
+
+const chatPdfAnalysis = async (req, res) => {
+  
+}
+
 module.exports = {
   createConversation,
   addMessage,
@@ -261,4 +329,6 @@ module.exports = {
   getUserConversations,
   deleteConversation,
   renameConversation,
+  chatImgAnalysis,
+  chatPdfAnalysis
 };
