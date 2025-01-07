@@ -1,10 +1,10 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
-const Groq = require("groq-sdk");
 const axios = require("axios");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const { groq } = require("../config/groq");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const fs = require('fs');
+const fs = require("fs");
+const pdfParse = require("pdf-parse");
 
 const askAI = async (conversationHistory, input) => {
   const messages = conversationHistory.map((msg) => ({
@@ -119,14 +119,12 @@ const addMessage = async (req, res) => {
         await conversation.save();
       }
     }
-    res
-      .status(201)
-      .json({
-        userMessage,
-        botMessage,
-        conversationTitle: conversation.title,
-        nodeState: conversation.nodeState,
-      });
+    res.status(201).json({
+      userMessage,
+      botMessage,
+      conversationTitle: conversation.title,
+      nodeState: conversation.nodeState,
+    });
 
     /**
      * Has the user problems satisfied?
@@ -148,7 +146,7 @@ const addMessage = async (req, res) => {
     //   ];
     //   const isSatisfied = await askGroq(groqMessages);
     //   console.log("Is satisfied : ", isSatisfied);
-      
+
     //   // if (isSatisfied) {
     //   //   // Update `nodeState` to true
     //   //   conversation.nodeState = true;
@@ -169,7 +167,6 @@ const addMessage = async (req, res) => {
 };
 
 const askGroq = async (conversationHistory) => {
-  
   try {
     const groqMessages = [
       {
@@ -185,13 +182,13 @@ const askGroq = async (conversationHistory) => {
       messages: groqMessages,
     });
     console.log("RESS :", analysisResponse.choices[0].message);
-    
+
     // Parse the response
     // const parsedResponse = JSON.parse(
     //   analysisResponse.choices[0].message.content
     // );
     // console.log("ASK GROQ : ", parsedResponse.satisfied);
-    
+
     // // Return the satisfaction result
     // return parsedResponse.satisfied;
   } catch (error) {
@@ -263,8 +260,8 @@ const chatImgAnalysis = async (req, res) => {
     // console.log("File url : ", fileUrl);
     // console.log("Fileee : ", req.file)
 
-    const imgBuffer = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-    const base64Image = Buffer.from(imgBuffer.data).toString('base64');
+    const imgBuffer = await axios.get(fileUrl, { responseType: "arraybuffer" });
+    const base64Image = Buffer.from(imgBuffer.data).toString("base64");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
@@ -296,31 +293,113 @@ const chatImgAnalysis = async (req, res) => {
 
     const response = await model.generateContent([prompt, imagePart]);
     const result = await response.response.text();
-    
+
     const { conversationId, sender, content } = req.body;
 
-    const userMessage = new Message({ conversationId, sender, content, fileUrl });
+    const userMessage = new Message({
+      conversationId,
+      sender,
+      content,
+      fileUrl,
+    });
     await userMessage.save();
-    
+
     const botMessage = new Message({
       conversationId,
       sender: null, // null sender implies AI chatbot
       content: result,
     });
     await botMessage.save();
-    
-    res.status(200).json({message: "Image Upload/Analysis success", content: result})
+
+    res
+      .status(200)
+      .json({ message: "Image Upload/Analysis success", content: result });
   } catch (error) {
-    console.log("Error Uploading/Analyzing Image : ", error)
+    console.log("Error Uploading/Analyzing Image : ", error);
     res.status(500).json({
       message: "Error Uploading/Analyzing Image",
     });
   }
-}
+};
 
 const chatPdfAnalysis = async (req, res) => {
-  
+  try {
+    const fileUrl = req?.file?.path;
+    const response = await axios.get(fileUrl, {
+      responseType: "arraybuffer",
+    });
+    const pdfBuffer = Buffer.from(response.data, "binary");
+
+    // Parse the PDF using pdf-parse
+    const pdfData = await pdfParse(pdfBuffer);
+    const pdfText = pdfData.text;
+
+    const prompt = `
+Analyze the following medical text and generate a concise summary:
+Text:
+${pdfText}
+
+Response format:
+{
+  "summary": "<Generated Summary>"
 }
+    `;
+
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama3-8b-8192",
+    });
+
+    if (
+      !completion ||
+      !completion.choices ||
+      !completion.choices.length ||
+      !completion.choices[0].message
+    ) {
+      throw new Error("Failed to generate title and summary from Groq.");
+    }
+
+    const responseText = completion.choices[0].message.content;
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Failed to extract JSON from Groq response.");
+    }
+
+    const parsedResponse = JSON.parse(jsonMatch);
+    const { summary } = parsedResponse;
+
+    const { conversationId, sender, content } = req.body;
+
+    const userMessage = new Message({
+      conversationId,
+      sender,
+      content,
+      fileUrl,
+    });
+    await userMessage.save();
+
+    const botMessage = new Message({
+      conversationId,
+      sender: null, // null sender implies AI chatbot
+      content: summary,
+    });
+    await botMessage.save();
+
+    res
+      .status(200)
+      .json({ message: "Document Upload/Analysis success", content: summary });
+  } catch (error) {
+    console.log("Error Uploading/Analyzing Document : ", error);
+    res.status(500).json({
+      message: "Error Uploading/Analyzing Document",
+    });
+  }
+};
 
 module.exports = {
   createConversation,
@@ -330,5 +409,5 @@ module.exports = {
   deleteConversation,
   renameConversation,
   chatImgAnalysis,
-  chatPdfAnalysis
+  chatPdfAnalysis,
 };

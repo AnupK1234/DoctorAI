@@ -22,6 +22,6 @@ router.get("/conversations/:conversationId/messages", getConversationMessages);
 router.put("/conversations/rename", renameConversation);
 router.delete("/conversations/:conversationId", deleteConversation);
 router.post("/img-analysis", authMiddleware, upload.single("file"), chatImgAnalysis);
-router.post("/pdf-analysis", authMiddleware, upload1.single("file"), chatPdfAnalysis);
+router.post("/pdf-analysis", authMiddleware, upload.single("file"), chatPdfAnalysis);
 
 module.exports = router;
