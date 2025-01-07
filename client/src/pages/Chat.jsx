@@ -76,16 +76,18 @@ const Chat = () => {
         setMessages(newMessages);
 
         // Add prompt and buttons after the first chatbot message
-        if (newMessages.length === 2) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              sender: null,
-              content: "Would you like to create a Node?",
-              options: true, // Indicate this message has buttons
-            },
-          ]);
-        }
+        // if (newMessages.length === 2) {
+        //   setMessages((prev) => [
+        //     ...prev,
+        //     {
+        //       sender: null,
+        //       content: "Would you like to create a Node?",
+        //       options: true, // Indicate this message has buttons
+        //     },
+        //   ]);
+        // }
+  
+        const timeOut = setTimeout(() => loadConversation(selectedConversation), 5000);
 
         if (res.data.conversationTitle !== "Untitled Conversation") {
           setSelectedConversation((selectedConversation) => ({

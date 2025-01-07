@@ -90,7 +90,7 @@ const addMessage = async (req, res) => {
   try {
     const { conversationId, sender, content } = req.body;
 
-    const conversationHistory = await Message.find({ conversationId }).sort({
+    let conversationHistory = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
 
@@ -135,32 +135,39 @@ const addMessage = async (req, res) => {
      *    Make usetimeout in FE of 5sec
      */
     let newMessage = null;
-    // if (!conversation.nodeState) {
-    //   const groqMessages = [
-    //     ...conversationHistory.map((msg) => ({
-    //       role: msg.sender ? "user" : "assistant",
-    //       content: msg.content,
-    //     })),
-    //     { role: "user", content },
-    //     { role: "assistant", content: response },
-    //   ];
-    //   const isSatisfied = await askGroq(groqMessages);
-    //   console.log("Is satisfied : ", isSatisfied);
+    if (!conversation.nodeState) {
+      // const groqMessages = [
+      //   ...conversationHistory.map((msg) => ({
+      //     role: msg.sender ? "user" : "assistant",
+      //     content: msg.content,
+      //   })),
+      //   { role: "user", content },
+      //   { role: "assistant", content: response },
+      // ];
 
-    //   // if (isSatisfied) {
-    //   //   // Update `nodeState` to true
-    //   //   conversation.nodeState = true;
+      conversationHistory = [...conversationHistory, userMessage, botMessage]
+      const messageContent = conversationHistory
+      .map((msg) => `${msg.sender ? "User" : "Bot"}: ${msg.content}`)
+      .join("\n");
 
-    //   //   // Add a new message to the conversation
-    //   //   newMessage = new Message({
-    //   //     conversationId,
-    //   //     sender: null,
-    //   //     content: "Would you like to create a node?",
-    //   //   });
-    //   //   await newMessage.save();
-    //   // }
-    // }
-    // await conversation.save();
+      const isSatisfied = await askGroq(messageContent);
+      console.log("Is satisfied : ", isSatisfied);
+      if (isSatisfied) {
+        // Update `nodeState` to true
+        conversation.nodeState = true;
+  
+        // Add a new message to the conversation
+        newMessage = new Message({
+          conversationId,
+          sender: null,
+          content: "Would you like to create a node?",
+        });
+        await newMessage.save();
+      }
+    }
+    
+    await conversation.save();
+    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -172,25 +179,26 @@ const askGroq = async (conversationHistory) => {
       {
         role: "system",
         content:
-          "Analyze the following conversation messages and determine if the user is satisfied with the interaction. Respond with 'true' if the user appears satisfied, otherwise respond with 'false'. Format your response as: {\"satisfied\": <true/false>}.",
+          "Analyze the following conversation messages and determine if the user is satisfied with the interaction. Respond with 'true' if the user appears satisfied, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information.Format your response as: {\"satisfied\": <true/false>}.",
       },
-      ...conversationHistory,
+      {
+        role: "user",
+        content: conversationHistory,
+      },
     ];
     console.log("CONv : ", groqMessages);
     const analysisResponse = await groq.chat.completions.create({
       model: "llama3-8b-8192",
       messages: groqMessages,
     });
-    console.log("RESS :", analysisResponse.choices[0].message);
 
     // Parse the response
-    // const parsedResponse = JSON.parse(
-    //   analysisResponse.choices[0].message.content
-    // );
-    // console.log("ASK GROQ : ", parsedResponse.satisfied);
+    const parsedResponse = JSON.parse(
+      analysisResponse.choices[0].message.content
+    );
 
-    // // Return the satisfaction result
-    // return parsedResponse.satisfied;
+    // Return the satisfaction result
+    return parsedResponse.satisfied;
   } catch (error) {
     console.error("Error communicating with Groq:", error.message);
     throw new Error("Failed to analyze conversation with Groq.");
