@@ -6,8 +6,14 @@ const {
   getConversationMessages,
   getUserConversations,
   deleteConversation,
-  renameConversation
+  renameConversation,
+  chatImgAnalysis,
+  chatPdfAnalysis,
 } = require("../../controllers/chatController");
+const multer = require("multer");
+const upload1 = multer({ storage: multer.memoryStorage() });
+const { upload, uploadFile } = require("../../utils/cloudinary");
+const authMiddleware = require("../../middlewares/authMiddleware");
 
 router.get("/conversations/user/:userId", getUserConversations);
 router.post("/conversations", createConversation);
@@ -15,5 +21,7 @@ router.post("/messages", addMessage);
 router.get("/conversations/:conversationId/messages", getConversationMessages);
 router.put("/conversations/rename", renameConversation);
 router.delete("/conversations/:conversationId", deleteConversation);
+router.post("/img-analysis", authMiddleware, upload.single("file"), chatImgAnalysis);
+router.post("/pdf-analysis", authMiddleware, upload.single("file"), chatPdfAnalysis);
 
 module.exports = router;

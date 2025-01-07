@@ -1,7 +1,6 @@
 const pdfParse = require("pdf-parse");
 const axios = require("axios");
-const Groq = require("groq-sdk");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const { groq } = require("../config/groq");
 const File = require("../models/File");
 const { cloudinary } = require("../utils/cloudinary");
 
@@ -99,7 +98,7 @@ const updateImgAnalysis = async (req, res) => {
         title: analyzeRes.data.result.substring(0, 50),
         imgAnalysis: analyzeRes.data.result,
         user: req.user.id,
-        imageUrl: imageData
+        imageUrl: imageData,
       });
     } else {
       document = await File.findOneAndUpdate(
@@ -117,7 +116,6 @@ const updateImgAnalysis = async (req, res) => {
       .send({ error: "An error occurred while processing the request" });
   }
 };
-
 
 const deleteDocById = async (req, res) => {
   try {
@@ -163,7 +161,6 @@ const deleteDocById = async (req, res) => {
     res.status(500).json({ message: "Failed to delete document" });
   }
 };
-
 
 module.exports = {
   parseCloudinaryPDF,

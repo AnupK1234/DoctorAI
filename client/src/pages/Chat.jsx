@@ -1,6 +1,6 @@
 import Cookie from "js-cookie";
 import React, { useEffect, useState } from "react";
-import { FiEdit, FiTrash } from "react-icons/fi";
+import { FiEdit, FiFile, FiImage, FiSend, FiTrash } from "react-icons/fi";
 import axios from "../utils/axiosInstance";
 
 const Chat = () => {
@@ -68,7 +68,11 @@ const Chat = () => {
         content: input,
       })
       .then((res) => {
-        const newMessages = [...messages, res.data.userMessage, res.data.botMessage];
+        const newMessages = [
+          ...messages,
+          res.data.userMessage,
+          res.data.botMessage,
+        ];
         setMessages(newMessages);
 
         // Add prompt and buttons after the first chatbot message
@@ -116,9 +120,58 @@ const Chat = () => {
         },
       ]);
     }
-    setShowButtons(state => !state);
+    setShowButtons((state) => !state);
     // No need to do anything for "No"
   };
+
+  const handleFileUpload = async (type) => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = type === "image" ? "image/*" : "application/pdf";
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+  
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("conversationId", selectedConversation._id);
+      formData.append("sender", user._id);
+      formData.append("content", `Uploaded ${type}: ${file.name}`);
+
+      try {
+        const response = await axios.post(
+          `/chat/${type === "image" ? "img-analysis" : "pdf-analysis"}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        console.log("REs : ", response);
+        // Update messages in the chat with the response
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            sender: user._id,
+            content: `Uploaded ${type}: ${file.name}`,
+          },
+          {
+            sender: null,
+            content: response.data.content, // Response from the backend AI
+          },
+        ]);
+      } catch (error) {
+        console.error("File upload failed:", error);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            sender: null,
+            content: `Error processing ${type}. Please try again.`,
+          },
+        ]);
+      }
+    };
+  
+    fileInput.click();
+  };
+  
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
@@ -223,12 +276,31 @@ const Chat = () => {
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                 placeholder="Type your message..."
               />
-              <button
-                onClick={sendMessage}
-                className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-              >
-                Send
-              </button>
+              <div className="flex gap-2">
+                {/* Send button */}
+                <button
+                  onClick={sendMessage}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex items-center"
+                >
+                  <FiSend className="mr-1" /> Send
+                </button>
+
+                {/* Image analysis button */}
+                <button
+                  onClick={() => handleFileUpload("image")}
+                  className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
+                >
+                  <FiImage />
+                </button>
+
+                {/* PDF analysis button */}
+                <button
+                  onClick={() => handleFileUpload("pdf")}
+                  className="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all flex items-center"
+                >
+                  <FiFile />
+                </button>
+              </div>
             </div>
           </div>
         ) : (
