@@ -71,69 +71,6 @@ app.post("/docusign-webhook", async (req, res) => {
 
 
 const OPENAI_API_URL = process.env.OPENAI_API_URL;
-app.post('/eleven/v1/chat/completions1', async (req, res) => {
-  // console.log('Request body:', req.body);
-  const { messages, model, stream } = req.body;
-
-  if (messages[0]?.role) messages[0].role = 'user';
-  // Validate the input
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({
-      error:
-        'Invalid request. `messages` is required and must be a non-empty array.',
-    });
-  }
-
-  try {
-    // Set up Axios request configuration
-    const config = {
-      method: 'post',
-      url: OPENAI_API_URL,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      data: {
-        model: model || 'gpt-4', // Default to gpt-4 if no model is specified
-        messages,
-        stream: stream || false, // Pass stream parameter to the API
-      },
-      responseType: stream ? 'stream' : 'json', // Handle streaming response if stream is true
-    };
-
-    const response = await axios(config);
-
-    if (stream) {
-      // Stream the response back to the client
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      response.data.on('data', (chunk) => {
-        res.write(chunk);
-      });
-
-      response.data.on('end', () => {
-        res.end();
-      });
-
-      response.data.on('error', (err) => {
-        console.error('Stream error:', err);
-        res.status(500).json({ error: 'Streaming failed.' });
-      });
-    } else {
-      // Respond with the assistant's reply for non-streaming requests
-      const reply = response.data.choices[0]?.message?.content;
-      res.json(response.data);
-    }
-  } catch (error) {
-    console.error('Error interacting with OpenAI:', error.message);
-    res.status(500).json({
-      error: 'Failed to process your request. Please try again later.',
-    });
-  }
-});
-
 app.post('/eleven/v1/chat/completions', async (req, res) => {
   const { messages, model, stream } = req.body;
   
