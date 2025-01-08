@@ -1,40 +1,40 @@
-const Conversation = require("../models/Conversation");
-const Message = require("../models/Message");
-const axios = require("axios");
-const { groq } = require("../config/groq");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const fs = require("fs");
-const pdfParse = require("pdf-parse");
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
+const axios = require('axios');
+const { groq } = require('../config/groq');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
 
 const askAI = async (conversationHistory, input) => {
   const messages = conversationHistory.map((msg) => ({
-    role: msg.sender ? "user" : "assistant",
+    role: msg.sender ? 'user' : 'assistant',
     content: msg.content,
   }));
   messages.unshift({
-    role: "system",
+    role: 'system',
     content:
-      "You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always prioritize safety, and encourage consulting a qualified healthcare provider for severe or critical issues. You are not a substitute for professional medical care but a helpful guide for health-related queries. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Avoid giving advice on topics outside of mental health. Always respond in 2-3 sentences.",
+      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always prioritize safety, and encourage consulting a qualified healthcare provider for severe or critical issues. You are not a substitute for professional medical care but a helpful guide for health-related queries. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Avoid giving advice on topics outside of mental health. Always respond in 2-3 sentences.',
   });
 
-  messages.push({ role: "user", content: input });
+  messages.push({ role: 'user', content: input });
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
   const OPENAI_API_URL = process.env.OPENAI_API_URL;
   const config = {
-    method: "post",
+    method: 'post',
     url: OPENAI_API_URL,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     data: {
-      model: "repository" || "gpt-4",
+      model: 'repository' || 'gpt-4',
       messages: messagesCopy,
       stream: false,
     },
-    responseType: "json",
+    responseType: 'json',
   };
 
   const openAIResponse = await axios(config);
@@ -51,24 +51,24 @@ const askAI = async (conversationHistory, input) => {
 };
 
 const generateTitle = async (messages) => {
-  const messageContent = messages.map((msg) => msg.content).join(" ");
+  const messageContent = messages.map((msg) => msg.content).join(' ');
   const titleResponse = await groq.chat.completions.create({
-    model: "llama3-8b-8192",
+    model: 'llama3-8b-8192',
     messages: [
       {
-        role: "system",
+        role: 'system',
         content:
           'Analyze the following conversation messages and determine if the topic is medically related. If it is, generate a concise and professional title summarizing the conversation\'s main context. If not, return \'false\'. Format your response as: {"title": "<title or false>"}.',
       },
-      { role: "user", content: messageContent },
+      { role: 'user', content: messageContent },
     ],
   });
   try {
     const aiResponse = JSON.parse(titleResponse.choices[0]?.message?.content);
-    return aiResponse.title || "false";
+    return aiResponse.title || 'false';
   } catch (error) {
-    console.error("Error parsing AI response:", error);
-    return "false";
+    console.error('Error parsing AI response:', error);
+    return 'false';
   }
 };
 
@@ -77,7 +77,7 @@ const createConversation = async (req, res) => {
     const { userId } = req.body;
     const conversation = new Conversation({
       userId,
-      title: "Untitled Conversation",
+      title: 'Untitled Conversation',
     });
     await conversation.save();
     res.status(201).json(conversation);
@@ -89,10 +89,14 @@ const createConversation = async (req, res) => {
 const addMessage = async (req, res) => {
   try {
     const { conversationId, sender, content } = req.body;
-
+    console.log('here', req.body);
     let conversationHistory = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
+
+    conversationHistory = conversationHistory.filter(
+      (x) => x.content !== 'Would you like to create a node?'
+    );
 
     const response = await askAI(conversationHistory, content);
 
@@ -108,13 +112,13 @@ const addMessage = async (req, res) => {
 
     // Update conversation title if this is the first message
     const conversation = await Conversation.findById(conversationId);
-    if (conversation && conversation.title === "Untitled Conversation") {
+    if (conversation && conversation.title === 'Untitled Conversation') {
       const allMessages = await Message.find({
         conversationId,
         sender: { $ne: null },
       }).sort({ createdAt: 1 });
       const newTitle = await generateTitle(allMessages);
-      if (newTitle && newTitle !== "false") {
+      if (newTitle && newTitle !== 'false') {
         conversation.title = newTitle;
         await conversation.save();
       }
@@ -145,50 +149,55 @@ const addMessage = async (req, res) => {
       //   { role: "assistant", content: response },
       // ];
 
-      conversationHistory = [...conversationHistory, userMessage, botMessage]
+      conversationHistory = [...conversationHistory, userMessage, botMessage];
       const messageContent = conversationHistory
-      .map((msg) => `${msg.sender ? "User" : "Bot"}: ${msg.content}`)
-      .join("\n");
+        .map((msg) => `${msg.sender ? 'User' : 'Bot'}: ${msg.content}`)
+        .join('\n');
 
-      const isSatisfied = await askGroq(messageContent);
-      console.log("Is satisfied : ", isSatisfied);
+      const isSatisfied = await askGroq(
+        messageContent,
+        conversationHistory.length
+      );
+      console.log('Is satisfied : ', isSatisfied);
       if (isSatisfied) {
         // Update `nodeState` to true
         conversation.nodeState = true;
-  
+
         // Add a new message to the conversation
         newMessage = new Message({
           conversationId,
           sender: null,
-          content: "Would you like to create a node?",
+          content: 'Would you like to create a node?',
         });
         await newMessage.save();
       }
     }
-    
+
     await conversation.save();
-    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-const askGroq = async (conversationHistory) => {
+const askGroq = async (conversationHistory, length) => {
+  if (length > 3) return true;
+  else return false;
+
   try {
     const groqMessages = [
       {
-        role: "system",
+        role: 'system',
         content:
-          "Analyze the following conversation messages and determine if the user is satisfied with the interaction. Respond with 'true' if the user appears satisfied, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information.Format your response as: {\"satisfied\": <true/false>}.",
+          "Analyze the following conversation messages and determine if the bot has answered the user's question in the interaction. Respond with 'true' if the bot answered or suggested some answer, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information. Format your response as: {\"satisfied\": <true/false>}.",
       },
       {
-        role: "user",
+        role: 'user',
         content: conversationHistory,
       },
     ];
-    console.log("CONv : ", groqMessages);
+    console.log('CONv : ', groqMessages);
     const analysisResponse = await groq.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: 'llama3-8b-8192',
       messages: groqMessages,
     });
 
@@ -200,8 +209,8 @@ const askGroq = async (conversationHistory) => {
     // Return the satisfaction result
     return parsedResponse.satisfied;
   } catch (error) {
-    console.error("Error communicating with Groq:", error.message);
-    throw new Error("Failed to analyze conversation with Groq.");
+    console.error('Error communicating with Groq:', error.message);
+    throw new Error('Failed to analyze conversation with Groq.');
   }
 };
 
@@ -238,7 +247,7 @@ const renameConversation = async (req, res) => {
       { new: true }
     );
     if (!conversation)
-      return res.status(404).json({ error: "Conversation not found" });
+      return res.status(404).json({ error: 'Conversation not found' });
     res.status(200).json(conversation);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -252,10 +261,10 @@ const deleteConversation = async (req, res) => {
       _id: conversationId,
     });
     if (!deletedConversation)
-      return res.status(404).json({ error: "Conversation not found" });
+      return res.status(404).json({ error: 'Conversation not found' });
     res
       .status(200)
-      .json({ message: "Conversation and its messages deleted successfully" });
+      .json({ message: 'Conversation and its messages deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -268,11 +277,11 @@ const chatImgAnalysis = async (req, res) => {
     // console.log("File url : ", fileUrl);
     // console.log("Fileee : ", req.file)
 
-    const imgBuffer = await axios.get(fileUrl, { responseType: "arraybuffer" });
-    const base64Image = Buffer.from(imgBuffer.data).toString("base64");
+    const imgBuffer = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+    const base64Image = Buffer.from(imgBuffer.data).toString('base64');
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
 
     // Create image part from buffer
     const imagePart = {
@@ -323,10 +332,11 @@ const chatImgAnalysis = async (req, res) => {
     res
       .status(200)
       .json({ message: "Image Upload/Analysis success", content: result, newMsg: userMessage });
+
   } catch (error) {
-    console.log("Error Uploading/Analyzing Image : ", error);
+    console.log('Error Uploading/Analyzing Image : ', error);
     res.status(500).json({
-      message: "Error Uploading/Analyzing Image",
+      message: 'Error Uploading/Analyzing Image',
     });
   }
 };
@@ -335,9 +345,9 @@ const chatPdfAnalysis = async (req, res) => {
   try {
     const fileUrl = req?.file?.path;
     const response = await axios.get(fileUrl, {
-      responseType: "arraybuffer",
+      responseType: 'arraybuffer',
     });
-    const pdfBuffer = Buffer.from(response.data, "binary");
+    const pdfBuffer = Buffer.from(response.data, 'binary');
 
     // Parse the PDF using pdf-parse
     const pdfData = await pdfParse(pdfBuffer);
@@ -357,11 +367,11 @@ Response format:
     const completion = await groq.chat.completions.create({
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
-      model: "llama3-8b-8192",
+      model: 'llama3-8b-8192',
     });
 
     if (
@@ -370,13 +380,13 @@ Response format:
       !completion.choices.length ||
       !completion.choices[0].message
     ) {
-      throw new Error("Failed to generate title and summary from Groq.");
+      throw new Error('Failed to generate title and summary from Groq.');
     }
 
     const responseText = completion.choices[0].message.content;
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error("Failed to extract JSON from Groq response.");
+      throw new Error('Failed to extract JSON from Groq response.');
     }
 
     const parsedResponse = JSON.parse(jsonMatch);
@@ -403,10 +413,11 @@ Response format:
     res
       .status(200)
       .json({ message: "Document Upload/Analysis success", content: summary, newMsg: userMessage });
+
   } catch (error) {
-    console.log("Error Uploading/Analyzing Document : ", error);
+    console.log('Error Uploading/Analyzing Document : ', error);
     res.status(500).json({
-      message: "Error Uploading/Analyzing Document",
+      message: 'Error Uploading/Analyzing Document',
     });
   }
 };
