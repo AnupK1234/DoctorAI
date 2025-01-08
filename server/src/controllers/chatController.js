@@ -302,13 +302,14 @@ const chatImgAnalysis = async (req, res) => {
     const response = await model.generateContent([prompt, imagePart]);
     const result = await response.response.text();
 
-    const { conversationId, sender, content } = req.body;
+    const { conversationId, sender, content, fileType } = req.body;
 
     const userMessage = new Message({
       conversationId,
       sender,
       content,
       fileUrl,
+      fileType
     });
     await userMessage.save();
 
@@ -321,7 +322,7 @@ const chatImgAnalysis = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Image Upload/Analysis success", content: result });
+      .json({ message: "Image Upload/Analysis success", content: result, newMsg: userMessage });
   } catch (error) {
     console.log("Error Uploading/Analyzing Image : ", error);
     res.status(500).json({
@@ -381,13 +382,14 @@ Response format:
     const parsedResponse = JSON.parse(jsonMatch);
     const { summary } = parsedResponse;
 
-    const { conversationId, sender, content } = req.body;
+    const { conversationId, sender, content, fileType } = req.body;
 
     const userMessage = new Message({
       conversationId,
       sender,
       content,
       fileUrl,
+      fileType
     });
     await userMessage.save();
 
@@ -400,7 +402,7 @@ Response format:
 
     res
       .status(200)
-      .json({ message: "Document Upload/Analysis success", content: summary });
+      .json({ message: "Document Upload/Analysis success", content: summary, newMsg: userMessage });
   } catch (error) {
     console.log("Error Uploading/Analyzing Document : ", error);
     res.status(500).json({
