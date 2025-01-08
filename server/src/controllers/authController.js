@@ -15,8 +15,6 @@ const signup = async (req, res) => {
 
     // token for docusign
     const accessToken = await getAccessToken();
-    const token = signToken(user._id);
-    const userObject = { _id: user._id, name: user.name, email: user.email };
 
     // DocuSign API client setup
     const dsApiClient = new docusign.ApiClient();
