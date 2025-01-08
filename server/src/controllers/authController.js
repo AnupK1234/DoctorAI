@@ -11,6 +11,8 @@ const signup = async (req, res) => {
     const { email, password, name, referral } = req.body;
     const user = await User.create({ email, password, name, referralCode: referral });
     const accessToken = await getAccessToken();
+    const token = signToken(user._id);
+    const userObject = { _id: user._id, name: user.name, email: user.email };
 
     // DocuSign API client setup
     const dsApiClient = new docusign.ApiClient();
@@ -115,6 +117,7 @@ const signup = async (req, res) => {
     res.status(201).json({
       message: "User created successfully",
       user: { id: user._id, email, name },
+      cookie: { token, userObject },
     });
   } catch (error) {
     console.log("ERRRR : ", error);
