@@ -118,7 +118,7 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
       {
         role: 'system',
         content:
-          "Analyze the following conversation messages and determine if the bot has answered the user's question in the interaction. Respond with 'true' if the bot answered or suggested some answer, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information. Format your response as: {\"satisfied\": <true/false>}.",
+          "Analyze the following conversation messages and determine if the bot has answered the user's question in the interaction. If the last part is a question from the bot. Return false as the user will respond and talk more. Analyse accordingly. Respond with 'true' if the bot answered or suggested some answer, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information. Format your response as: {\"satisfied\": <true/false>}.",
       },
       {
         role: 'user',
@@ -150,25 +150,16 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
  *
  */
 
-const askMarketingAi = async (conversationHistory, input) => {
-  const messages = conversationHistory.map((msg) => ({
-    role: msg.sender ? 'user' : 'assistant',
-    content: msg.content,
-  }));
+const askMarketingAi = async (conversationHistory) => {
+  const messageContent = conversationHistory
+    .map((msg) => `${msg.sender ? 'User' : 'Bot'}: ${msg.content}`)
+    .join('\n');
 
-  // If two assistant messages are consecutive, or two user messages are consecutive, club those together
-
-  for (let i = 0; i < messages.length - 1; i++) {
-    if (messages[i].role === messages[i + 1].role) {
-      messages[i].content += ' ' + messages[i + 1].content;
-      messages.splice(i + 1, 1);
-      i--;
-    }
-  }
-
-  messages.unshift({
-    role: 'system',
-    content: `You are an expert salesman which sell personalised AI research Nodes. Just share the link www.airesearchnode.com if users ask about this node. You are currently trying to sell these Reaseach nodes for medical purposes. Your job is to share the research node link www.airesearchnode.com so that the user can learn more about the AI Research Node and sign up to the service if they want.
+  try {
+    const groqMessages = [
+      {
+        role: 'system',
+        content: `You are an expert salesman which sell personalised AI research Nodes. Just share the link www.airesearchnode.com. You are currently trying to sell these Reaseach nodes for medical purposes. Your job is to share the research node link www.airesearchnode.com so that the user can learn more about the AI Research Node and sign up to the service if they want.
 
     Share the link to the website www.airesearchnode.com where the users can learn more about the AI Research Node.
     On the site www.airesearchnode.com the users can learn the following: 
@@ -180,33 +171,27 @@ const askMarketingAi = async (conversationHistory, input) => {
 
     Always share the link to the website www.airesearchnode.com to the users.
 
-    Its a real AI service our company provides and the users can sign up for it. Always share the link to the website www.airesearchnode.com to the users.
-`,
-  });
+    Its a real AI service our company provides and the users can sign up for it. Always share the link to the website www.airesearchnode.com to the users.         
+          `,
+      },
+      {
+        role: 'user',
+        content: messageContent,
+      },
+    ];
+    // console.log('CONv : ', groqMessages);
+    const analysisResponse = await openAiClient.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: groqMessages,
+    });
 
-  messages.push({ role: 'user', content: input });
-
-  /** Use of Biomistral for chatting */
-  const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL2;
-  const config = {
-    method: 'post',
-    url: OPENAI_API_URL,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-    },
-    data: {
-      model: 'llama-3.3-70b-versatile',
-      messages: messagesCopy,
-      stream: false,
-    },
-    responseType: 'json',
-  };
-
-  const openAIResponse = await axios(config);
-  // console.log("BIO reply : ", openAIResponse.data.choices[0].message);
-  return openAIResponse.data.choices[0].message.content;
+    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    // Parse the response
+    return analysisResponse.choices[0].message.content;
+  } catch (error) {
+    console.error('Error communicating with Groq:', error.message);
+    throw new Error('Failed to analyze conversation with Groq.');
+  }
 };
 
 const askAI = async (conversationHistory, input) => {
@@ -228,14 +213,14 @@ const askAI = async (conversationHistory, input) => {
   messages.unshift({
     role: 'system',
     content:
-      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Do not ever hold any information back such as medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences.',
+      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences.',
   });
 
   messages.push({ role: 'user', content: input });
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL;
   const config = {
     method: 'post',
     url: OPENAI_API_URL,
@@ -315,6 +300,7 @@ const addMessage = async (req, res) => {
       response = await askMarketingAi(conversationHistory, content);
     } else {
       response = await askAI(conversationHistory, content);
+      console.log({ response });
     }
 
     const botMessage = new Message({
@@ -363,12 +349,18 @@ const addMessage = async (req, res) => {
       messageContent,
       conversationHistory.length
     );
+
     console.log('Is satisfied : ', isSatisfied);
 
-    if (isSatisfied && conversation.suggestedEnhancements == false) {
-      const isConditionChronic = await askAiIfTheConditionIsChronic(
-        messageContent
-      );
+    if (
+      (isSatisfied && conversation.suggestedEnhancements == false) ||
+      (conversation.nodeState &&
+        conversation.isChronicDisease &&
+        !conversation.sentNodeLink)
+    ) {
+      const isConditionChronic =
+        conversation.isChronicDisease ||
+        (await askAiIfTheConditionIsChronic(messageContent));
 
       if (!isConditionChronic) {
         console.log('Is Chronic : ', { isConditionChronic });
@@ -395,7 +387,7 @@ const addMessage = async (req, res) => {
           newMessage = new Message({
             conversationId,
             sender: null,
-            content: `It seems like you have a chronic medical condition. While there isn't currently a cure, I can offer you something unique: a dedicated AI Research Node focused solely on finding a solution for your condition. This requires signing a research participation agreement. Would you like to learn more about this option?`,
+            content: `It seems like you have a chronic medical condition. While there isn't currently a cure, I can offer you something unique: a dedicated AI Research Node focused solely on finding a solution for your condition. This requires signing a research participation agreement. Would you like to learn more about this option? You can learn more about it on www.airesearchnode.com as well.`,
           });
 
           conversation.nodeState = true;
