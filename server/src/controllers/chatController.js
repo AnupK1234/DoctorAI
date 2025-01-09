@@ -188,16 +188,16 @@ const askMarketingAi = async (conversationHistory, input) => {
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL2;
   const config = {
     method: 'post',
     url: OPENAI_API_URL,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
     },
     data: {
-      model: 'gpt-4o-mini',
+      model: 'llama-3.3-70b-versatile',
       messages: messagesCopy,
       stream: false,
     },
@@ -299,9 +299,12 @@ const addMessage = async (req, res) => {
     let conversationHistory = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
+    const userMessage = new Message({ conversationId, sender, content });
+    await userMessage.save();
+
     const conversation = await Conversation.findById(conversationId);
 
-    let response = await askAI(conversationHistory, content);
+    let response;
 
     if (
       conversation.nodeState &&
@@ -310,10 +313,9 @@ const addMessage = async (req, res) => {
     ) {
       console.log('inside marketing ai', 8698);
       response = await askMarketingAi(conversationHistory, content);
+    } else {
+      response = await askAI(conversationHistory, content);
     }
-
-    const userMessage = new Message({ conversationId, sender, content });
-    await userMessage.save();
 
     const botMessage = new Message({
       conversationId,
@@ -378,7 +380,7 @@ const addMessage = async (req, res) => {
         newMessage = new Message({
           conversationId,
           sender: null,
-          content: `I'd like to introduce you to something beyond traditional healthcare. While I can help with medical conditions, I can also assist in exploring ways to enhance human capabilities - both physical and cognitive. This includes potential improvements in areas like mental performance, physical capabilities, and overall wellbeing. Would you like to learn more about these enhancement possibilities?`,
+          content: `I'd like to introduce you to something beyond traditional healthcare. While I can help with medical conditions, I can also assist in exploring ways to enhance human capabilities - both physical and cognitive. This includes potential improvements in areas like mental performance, physical capabilities, overall wellbeing and longevity. Would you like to learn more about these enhancement possibilities?`,
         });
 
         conversation.suggestedEnhancements = true;
