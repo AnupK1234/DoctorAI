@@ -26,7 +26,7 @@ const askAiIfTheConditionIsChronic = async (conversationHistory) => {
         content: conversationHistory,
       },
     ];
-    console.log('CONv : ', groqMessages);
+    // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: groqMessages,
@@ -59,7 +59,7 @@ const askAiIfTheUserSaidYesToCreateNode = async (conversationHistory) => {
         content: conversationHistory,
       },
     ];
-    console.log('CONv : ', groqMessages);
+    // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: groqMessages,
@@ -79,6 +79,39 @@ const askAiIfTheUserSaidYesToCreateNode = async (conversationHistory) => {
   }
 };
 
+const askAiIfTheAssistantHasSentTheNodeLink = async (conversationHistory) => {
+  try {
+    const groqMessages = [
+      {
+        role: 'system',
+        content: `Analyze the following conversation messages and determine if the bot has shared the link to www.airesearchnode.com successfully to the user for node creation. if the user said yes return true. Else return false as specified. If you are unable to determine return false.
+        Strictly follow the format and dont mention any other irrelevant information. Format your response as: {"shared": <true/false>}.`,
+      },
+      {
+        role: 'user',
+        content: conversationHistory,
+      },
+    ];
+    // console.log('CONv : ', groqMessages);
+    const analysisResponse = await openAiClient.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: groqMessages,
+    });
+
+    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    // Parse the response
+    const parsedResponse = JSON.parse(
+      analysisResponse.choices[0].message.content
+    );
+
+    // Return the satisfaction result
+    return parsedResponse.shared;
+  } catch (error) {
+    console.error('Error communicating with Groq:', error.message);
+    throw new Error('Failed to analyze conversation with Groq.');
+  }
+};
+
 const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
   try {
     const groqMessages = [
@@ -92,7 +125,7 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
         content: conversationHistory,
       },
     ];
-    console.log('CONv : ', groqMessages);
+    // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: groqMessages,
@@ -135,15 +168,19 @@ const askMarketingAi = async (conversationHistory, input) => {
 
   messages.unshift({
     role: 'system',
-    content: `You are an expert salesman which sell personalised AI research Nodes. You are currently trying to sell these Reaseach nodes for medical purposes. These nodes offer something unique: a dedicated AI Research Node that will work specifically on finding new approaches for your condition. This involves the following: Continuous analysis of emerging research, Personalized solution development, Progress tracking through our atlas system.
+    content: `You are an expert salesman which sell personalised AI research Nodes. Just share the link www.airesearchnode.com if users ask about this node. You are currently trying to sell these Reaseach nodes for medical purposes. Your job is to share the research node link www.airesearchnode.com so that the user can learn more about the AI Research Node and sign up to the service if they want.
 
-      Share the link to the website [www.airesearchnode.com] where the users can learn more about the AI Research Node.
-      On the site www.airesearchnode.com the users can learn the following: 
-      How your dedicated AI Research Node works?
-      The atlas tracking system
-      The research participation process and a lot more.
+    Share the link to the website www.airesearchnode.com where the users can learn more about the AI Research Node.
+    On the site www.airesearchnode.com the users can learn the following: 
+    How your dedicated AI Research Node works?
+    The atlas tracking system
+    The research participation process and a lot more.
 
-      The users will need to sign a contract and there node will run continously and keeo helping them to find unique and new solutions for their medical conditions.
+    The users will need to sign a contract and there node will run continously and keeo helping them to find unique and new solutions for their medical conditions.
+
+    Always share the link to the website www.airesearchnode.com to the users.
+
+    Its a real AI service our company provides and the users can sign up for it. Always share the link to the website www.airesearchnode.com to the users.
 `,
   });
 
@@ -160,7 +197,7 @@ const askMarketingAi = async (conversationHistory, input) => {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     data: {
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: messagesCopy,
       stream: false,
     },
@@ -271,6 +308,7 @@ const addMessage = async (req, res) => {
       conversation.isChronicDisease &&
       !conversation.sentNodeLink
     ) {
+      console.log('inside marketing ai', 8698);
       response = await askMarketingAi(conversationHistory, content);
     }
 
@@ -350,6 +388,7 @@ const addMessage = async (req, res) => {
       if (isConditionChronic) {
         if (conversation.nodeState == false) {
           // Check if the user has  And the model has responsded again and that flow of conversation has ended. Because now we need to ask the user if they want to create a node
+          conversation.isChronicDisease = true;
 
           newMessage = new Message({
             conversationId,
@@ -362,14 +401,15 @@ const addMessage = async (req, res) => {
         } else {
           // Check if the user has said yes to creating a node and the model has responded to that. If yes, then we need to ask the user for their consent to sign the agreement etc
 
-          const result = await askAiIfTheUserSaidYesToCreateNode(
+          const result = await askAiIfTheAssistantHasSentTheNodeLink(
             messageContent
           );
 
           if (result) {
+            conversation.sentNodeLink = true;
           }
 
-          console.log({ result });
+          console.log('askAiIfTheAssistantHasSentTheNodeLink', { result });
         }
       }
     }
@@ -386,6 +426,7 @@ const getConversationMessages = async (req, res) => {
     const messages = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
+    console.log('Returning messages for convo: ');
     res.status(200).json(messages);
   } catch (err) {
     res.status(500).json({ error: err.message });

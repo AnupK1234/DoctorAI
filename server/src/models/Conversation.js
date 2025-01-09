@@ -12,6 +12,7 @@ const conversationSchema = new mongoose.Schema(
     nodeState: { type: Boolean, default: false },
     isChronicDisease: { type: Boolean, default: false },
     suggestedEnhancements: { type: Boolean, default: false },
+    sentNodeLink: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
