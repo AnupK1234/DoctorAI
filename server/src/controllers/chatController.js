@@ -3,6 +3,7 @@ const Message = require('../models/Message');
 const axios = require('axios');
 const { groq } = require('../config/groq');
 const OpenAI = require('openai');
+const { sendSSEUpdate } = require("../utils/sseHandler")
 
 const openAiClient = new OpenAI({
   apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
@@ -406,6 +407,14 @@ const addMessage = async (req, res) => {
           console.log('askAiIfTheAssistantHasSentTheNodeLink', { result });
         }
       }
+    }
+
+    if (newMessage) {
+      // console.log("New msg created : ", newMessage)
+      sendSSEUpdate(conversationId, {
+        type: 'new_message',
+        message: newMessage
+      });
     }
 
     await conversation.save();
