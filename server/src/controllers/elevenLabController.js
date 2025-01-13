@@ -1,4 +1,5 @@
 const axios = require("axios");
+const AvatarConversation = require("../models/AvatarConversation");
 
 const getSignedUrl = async (req, res) => {
   try {
@@ -99,4 +100,47 @@ const huggingFaceMode = async (req, res) => {
   }
 };
 
-module.exports = { getSignedUrl, huggingFaceMode };
+const saveAvatarConversation = async (req, res) => {
+  const { conversation_id } = req.body;
+
+  try {
+    const conversationData = await axios.get(
+      `https://api.elevenlabs.io/v1/convai/conversations/${conversation_id}`,
+      {
+        headers: {
+          "xi-api-key": process.env.XI_API_KEY,
+        },
+      }
+    ); 
+
+    const conversation_transcript = conversationData?.data?.transcript.map(
+      (item) => ({
+        role: item.role,
+        message: item.message,
+      })
+    );
+
+    const newConversation = new AvatarConversation({
+      userId: req.user.id,
+      conversation_id,
+      conversation_transcript: conversation_transcript,
+    });
+
+    await newConversation.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Conversation saved successfully",
+      data: newConversation,
+    });
+  } catch (error) {
+    console.error("Error saving conversation:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error saving conversation",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { getSignedUrl, huggingFaceMode, saveAvatarConversation };

@@ -20,9 +20,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 connectDB();
 
 const app = express();
-
-// Server side event
-
+ 
 // Middleware
 app.use(morgan("tiny"));
 app.use(cookieParser());

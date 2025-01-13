@@ -221,7 +221,7 @@ const askAI = async (conversationHistory, input) => {
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
   const config = {
     method: 'post',
     url: OPENAI_API_URL,
@@ -416,7 +416,7 @@ const addMessage = async (req, res) => {
         message: newMessage
       });
     }
-
+''
     await conversation.save();
   } catch (err) {
     console.log({ err });
