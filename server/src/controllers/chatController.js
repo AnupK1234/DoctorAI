@@ -195,7 +195,7 @@ const askMarketingAi = async (conversationHistory) => {
   }
 };
 
-const askAI = async (conversationHistory, input) => {
+const askAI = async (conversationHistory, input, convQuestionaire) => {
   const messages = conversationHistory.map((msg) => ({
     role: msg.sender ? 'user' : 'assistant',
     content: msg.content,
@@ -211,17 +211,23 @@ const askAI = async (conversationHistory, input) => {
     }
   }
 
+  const userBackground = convQuestionaire ? 
+    `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
+      .map(item => `- ${item.question}\nUser's Response: ${item.answer}`)
+      .join('\n\n')}` : '';
+  
+
   messages.unshift({
     role: 'system',
     content:
-      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences.',
+      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences.' + userBackground,
   });
 
   messages.push({ role: 'user', content: input });
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL;
   const config = {
     method: 'post',
     url: OPENAI_API_URL,
@@ -266,10 +272,11 @@ const generateTitle = async (messages) => {
 
 const createConversation = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, questionaireData } = req.body;
     const conversation = new Conversation({
       userId,
       title: 'Untitled Conversation',
+      questionaireData
     });
     await conversation.save();
     res.status(201).json(conversation);
@@ -289,6 +296,7 @@ const addMessage = async (req, res) => {
     await userMessage.save();
 
     const conversation = await Conversation.findById(conversationId);
+    const convQuestionaire = conversation.questionaireData;
 
     let response;
 
@@ -300,7 +308,7 @@ const addMessage = async (req, res) => {
       console.log('inside marketing ai', 8698);
       response = await askMarketingAi(conversationHistory, content);
     } else {
-      response = await askAI(conversationHistory, content);
+      response = await askAI(conversationHistory, content, convQuestionaire);
       console.log({ response });
     }
 
