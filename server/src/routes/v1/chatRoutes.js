@@ -9,6 +9,7 @@ const {
   renameConversation,
   chatImgAnalysis,
   chatPdfAnalysis,
+  generateQuestions
 } = require("../../controllers/chatController");
 const multer = require("multer");
 const upload1 = multer({ storage: multer.memoryStorage() });
@@ -23,5 +24,6 @@ router.put("/conversations/rename", renameConversation);
 router.delete("/conversations/:conversationId", deleteConversation);
 router.post("/img-analysis", authMiddleware, upload.single("file"), chatImgAnalysis);
 router.post("/pdf-analysis", authMiddleware, upload.single("file"), chatPdfAnalysis);
+router.post("/generate-questions", authMiddleware, generateQuestions)
 
 module.exports = router;

@@ -1,39 +1,39 @@
-const Conversation = require('../models/Conversation');
-const Message = require('../models/Message');
-const axios = require('axios');
-const { groq } = require('../config/groq');
-const OpenAI = require('openai');
-const { sendSSEUpdate } = require("../utils/sseHandler")
+const Conversation = require("../models/Conversation");
+const Message = require("../models/Message");
+const axios = require("axios");
+const { groq } = require("../config/groq");
+const OpenAI = require("openai");
+const { sendSSEUpdate } = require("../utils/sseHandler");
 
 const openAiClient = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
+  apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
 });
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const fs = require('fs');
-const pdfParse = require('pdf-parse');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require("fs");
+const pdfParse = require("pdf-parse");
 
 const askAiIfTheConditionIsChronic = async (conversationHistory) => {
   try {
     const groqMessages = [
       {
-        role: 'system',
+        role: "system",
         content: `Analyze the following conversation messages and determine if the bot the user has a chronic medical condition. If the user has a chronic condition return true. Else return false as specified. 
           Some examples of chronic conditions include diabetes, hypertension, asthma, arthritis, and heart disease etc.
           Strictly follow the format and dont mention any other irrelevant information. Format your response as: {"isChronic": <true/false>}.`,
       },
       {
-        role: 'user',
+        role: "user",
         content: conversationHistory,
       },
     ];
     // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: groqMessages,
     });
 
-    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    console.log("Analysis Response : ", analysisResponse.choices[0].message);
     // Parse the response
     const parsedResponse = JSON.parse(
       analysisResponse.choices[0].message.content
@@ -42,8 +42,8 @@ const askAiIfTheConditionIsChronic = async (conversationHistory) => {
     // Return the satisfaction result
     return parsedResponse.isChronic;
   } catch (error) {
-    console.error('Error communicating with Groq:', error.message);
-    throw new Error('Failed to analyze conversation with Groq.');
+    console.error("Error communicating with Groq:", error.message);
+    throw new Error("Failed to analyze conversation with Groq.");
   }
 };
 
@@ -51,22 +51,22 @@ const askAiIfTheUserSaidYesToCreateNode = async (conversationHistory) => {
   try {
     const groqMessages = [
       {
-        role: 'system',
+        role: "system",
         content: `Analyze the following conversation messages and determine if the user said yes to creating the node. if the user said yes return true. Else return false as specified. If you are unable to determine return false.
         Strictly follow the format and dont mention any other irrelevant information. Format your response as: {"saidYes": <true/false>}.`,
       },
       {
-        role: 'user',
+        role: "user",
         content: conversationHistory,
       },
     ];
     // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: groqMessages,
     });
 
-    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    console.log("Analysis Response : ", analysisResponse.choices[0].message);
     // Parse the response
     const parsedResponse = JSON.parse(
       analysisResponse.choices[0].message.content
@@ -75,8 +75,8 @@ const askAiIfTheUserSaidYesToCreateNode = async (conversationHistory) => {
     // Return the satisfaction result
     return parsedResponse.saidYes;
   } catch (error) {
-    console.error('Error communicating with Groq:', error.message);
-    throw new Error('Failed to analyze conversation with Groq.');
+    console.error("Error communicating with Groq:", error.message);
+    throw new Error("Failed to analyze conversation with Groq.");
   }
 };
 
@@ -84,22 +84,22 @@ const askAiIfTheAssistantHasSentTheNodeLink = async (conversationHistory) => {
   try {
     const groqMessages = [
       {
-        role: 'system',
+        role: "system",
         content: `Analyze the following conversation messages and determine if the bot has shared the link to www.airesearchnode.com successfully to the user for node creation. if the user said yes return true. Else return false as specified. If you are unable to determine return false.
         Strictly follow the format and dont mention any other irrelevant information. Format your response as: {"shared": <true/false>}.`,
       },
       {
-        role: 'user',
+        role: "user",
         content: conversationHistory,
       },
     ];
     // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: groqMessages,
     });
 
-    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    console.log("Analysis Response : ", analysisResponse.choices[0].message);
     // Parse the response
     const parsedResponse = JSON.parse(
       analysisResponse.choices[0].message.content
@@ -108,8 +108,8 @@ const askAiIfTheAssistantHasSentTheNodeLink = async (conversationHistory) => {
     // Return the satisfaction result
     return parsedResponse.shared;
   } catch (error) {
-    console.error('Error communicating with Groq:', error.message);
-    throw new Error('Failed to analyze conversation with Groq.');
+    console.error("Error communicating with Groq:", error.message);
+    throw new Error("Failed to analyze conversation with Groq.");
   }
 };
 
@@ -117,22 +117,22 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
   try {
     const groqMessages = [
       {
-        role: 'system',
+        role: "system",
         content:
           "Analyze the following conversation messages and determine if the bot has answered the user's question in the interaction. If the last part is a question from the bot. Return false as the user will respond and talk more. Analyse accordingly. Respond with 'true' if the bot answered or suggested some answer, otherwise respond with 'false'. Strictly follow the format and dont mention any other irrelevant information. Format your response as: {\"satisfied\": <true/false>}.",
       },
       {
-        role: 'user',
+        role: "user",
         content: conversationHistory,
       },
     ];
     // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: groqMessages,
     });
 
-    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    console.log("Analysis Response : ", analysisResponse.choices[0].message);
     // Parse the response
     const parsedResponse = JSON.parse(
       analysisResponse.choices[0].message.content
@@ -141,8 +141,8 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
     // Return the satisfaction result
     return parsedResponse.satisfied;
   } catch (error) {
-    console.error('Error communicating with Groq:', error.message);
-    throw new Error('Failed to analyze conversation with Groq.');
+    console.error("Error communicating with Groq:", error.message);
+    throw new Error("Failed to analyze conversation with Groq.");
   }
 };
 
@@ -153,13 +153,13 @@ const askGroq = async function askAiIfTheUserIsSatisfied(conversationHistory) {
 
 const askMarketingAi = async (conversationHistory) => {
   const messageContent = conversationHistory
-    .map((msg) => `${msg.sender ? 'User' : 'Bot'}: ${msg.content}`)
-    .join('\n');
+    .map((msg) => `${msg.sender ? "User" : "Bot"}: ${msg.content}`)
+    .join("\n");
 
   try {
     const groqMessages = [
       {
-        role: 'system',
+        role: "system",
         content: `You are an expert salesman which sell personalised AI research Nodes. Just share the link www.airesearchnode.com. You are currently trying to sell these Reaseach nodes for medical purposes. Your job is to share the research node link www.airesearchnode.com so that the user can learn more about the AI Research Node and sign up to the service if they want.
 
     Share the link to the website www.airesearchnode.com where the users can learn more about the AI Research Node.
@@ -176,28 +176,28 @@ const askMarketingAi = async (conversationHistory) => {
           `,
       },
       {
-        role: 'user',
+        role: "user",
         content: messageContent,
       },
     ];
     // console.log('CONv : ', groqMessages);
     const analysisResponse = await openAiClient.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: groqMessages,
     });
 
-    console.log('Analysis Response : ', analysisResponse.choices[0].message);
+    console.log("Analysis Response : ", analysisResponse.choices[0].message);
     // Parse the response
     return analysisResponse.choices[0].message.content;
   } catch (error) {
-    console.error('Error communicating with Groq:', error.message);
-    throw new Error('Failed to analyze conversation with Groq.');
+    console.error("Error communicating with Groq:", error.message);
+    throw new Error("Failed to analyze conversation with Groq.");
   }
 };
 
 const askAI = async (conversationHistory, input, convQuestionaire) => {
   const messages = conversationHistory.map((msg) => ({
-    role: msg.sender ? 'user' : 'assistant',
+    role: msg.sender ? "user" : "assistant",
     content: msg.content,
   }));
 
@@ -205,42 +205,43 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
 
   for (let i = 0; i < messages.length - 1; i++) {
     if (messages[i].role === messages[i + 1].role) {
-      messages[i].content += ' ' + messages[i + 1].content;
+      messages[i].content += " " + messages[i + 1].content;
       messages.splice(i + 1, 1);
       i--;
     }
   }
 
-  const userBackground = convQuestionaire ? 
-    `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
-      .map(item => `- ${item.question}\nUser's Response: ${item.answer}`)
-      .join('\n\n')}` : '';
-  
+  const userBackground = convQuestionaire
+    ? `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
+        .map((item) => `- ${item.question}\nUser's Response: ${item.answer}`)
+        .join("\n\n")}`
+    : "";
 
   messages.unshift({
-    role: 'system',
+    role: "system",
     content:
-      'You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences.' + userBackground,
+      "You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences." +
+      userBackground,
   });
 
-  messages.push({ role: 'user', content: input });
+  messages.push({ role: "user", content: input });
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
   const config = {
-    method: 'post',
+    method: "post",
     url: OPENAI_API_URL,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     data: {
-      model: 'gpt-4o',
+      model: "gpt-4o",
       messages: messagesCopy,
       stream: false,
     },
-    responseType: 'json',
+    responseType: "json",
   };
 
   const openAIResponse = await axios(config);
@@ -249,24 +250,24 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
 };
 
 const generateTitle = async (messages) => {
-  const messageContent = messages.map((msg) => msg.content).join(' ');
+  const messageContent = messages.map((msg) => msg.content).join(" ");
   const titleResponse = await groq.chat.completions.create({
-    model: 'llama3-8b-8192',
+    model: "llama3-8b-8192",
     messages: [
       {
-        role: 'system',
+        role: "system",
         content:
           'Analyze the following conversation messages and determine if the topic is medically related. If it is, generate a concise and professional title summarizing the conversation\'s main context. If not, return \'false\'. Format your response as: {"title": "<title or false>"}.',
       },
-      { role: 'user', content: messageContent },
+      { role: "user", content: messageContent },
     ],
   });
   try {
     const aiResponse = JSON.parse(titleResponse.choices[0]?.message?.content);
-    return aiResponse.title || 'false';
+    return aiResponse.title || "false";
   } catch (error) {
-    console.error('Error parsing AI response:', error);
-    return 'false';
+    console.error("Error parsing AI response:", error);
+    return "false";
   }
 };
 
@@ -275,8 +276,8 @@ const createConversation = async (req, res) => {
     const { userId, questionaireData } = req.body;
     const conversation = new Conversation({
       userId,
-      title: 'Untitled Conversation',
-      questionaireData
+      title: "Untitled Conversation",
+      questionaireData,
     });
     await conversation.save();
     res.status(201).json(conversation);
@@ -288,7 +289,7 @@ const createConversation = async (req, res) => {
 const addMessage = async (req, res) => {
   try {
     const { conversationId, sender, content } = req.body;
-    console.log('here', req.body);
+    console.log("here", req.body);
     let conversationHistory = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
@@ -305,7 +306,7 @@ const addMessage = async (req, res) => {
       conversation.isChronicDisease &&
       !conversation.sentNodeLink
     ) {
-      console.log('inside marketing ai', 8698);
+      console.log("inside marketing ai", 8698);
       response = await askMarketingAi(conversationHistory, content);
     } else {
       response = await askAI(conversationHistory, content, convQuestionaire);
@@ -320,13 +321,13 @@ const addMessage = async (req, res) => {
     await botMessage.save();
 
     // Update conversation title if this is the first message
-    if (conversation && conversation.title === 'Untitled Conversation') {
+    if (conversation && conversation.title === "Untitled Conversation") {
       const allMessages = await Message.find({
         conversationId,
         sender: { $ne: null },
       }).sort({ createdAt: 1 });
       const newTitle = await generateTitle(allMessages);
-      if (newTitle && newTitle !== 'false') {
+      if (newTitle && newTitle !== "false") {
         conversation.title = newTitle;
         await conversation.save();
       }
@@ -351,15 +352,15 @@ const addMessage = async (req, res) => {
 
     conversationHistory = [...conversationHistory, userMessage, botMessage];
     const messageContent = conversationHistory
-      .map((msg) => `${msg.sender ? 'User' : 'Bot'}: ${msg.content}`)
-      .join('\n');
+      .map((msg) => `${msg.sender ? "User" : "Bot"}: ${msg.content}`)
+      .join("\n");
 
     const isSatisfied = await askGroq(
       messageContent,
       conversationHistory.length
     );
 
-    console.log('Is satisfied : ', isSatisfied);
+    console.log("Is satisfied : ", isSatisfied);
 
     if (
       (isSatisfied && conversation.suggestedEnhancements == false) ||
@@ -372,7 +373,7 @@ const addMessage = async (req, res) => {
         (await askAiIfTheConditionIsChronic(messageContent));
 
       if (!isConditionChronic) {
-        console.log('Is Chronic : ', { isConditionChronic });
+        console.log("Is Chronic : ", { isConditionChronic });
         // Update `nodeState` to true
         conversation.isChronicDisease = false;
 
@@ -388,43 +389,43 @@ const addMessage = async (req, res) => {
         await newMessage.save();
       }
 
-      if (isConditionChronic) {
-        if (conversation.nodeState == false) {
-          // Check if the user has  And the model has responsded again and that flow of conversation has ended. Because now we need to ask the user if they want to create a node
-          conversation.isChronicDisease = true;
+      // if (isConditionChronic) {
+      //   if (conversation.nodeState == false) {
+      //     // Check if the user has  And the model has responsded again and that flow of conversation has ended. Because now we need to ask the user if they want to create a node
+      //     conversation.isChronicDisease = true;
 
-          newMessage = new Message({
-            conversationId,
-            sender: null,
-            content: `It seems like you have a chronic medical condition. While there isn't currently a cure, I can offer you something unique: a dedicated AI Research Node focused solely on finding a solution for your condition. This requires signing a research participation agreement. Would you like to learn more about this option? You can learn more about it on www.airesearchnode.com as well.`,
-          });
+      //     newMessage = new Message({
+      //       conversationId,
+      //       sender: null,
+      //       content: `It seems like you have a chronic medical condition. While there isn't currently a cure, I can offer you something unique: a dedicated AI Research Node focused solely on finding a solution for your condition. This requires signing a research participation agreement. Would you like to learn more about this option? You can learn more about it on www.airesearchnode.com as well.`,
+      //     });
 
-          conversation.nodeState = true;
-          await newMessage.save();
-        } else {
-          // Check if the user has said yes to creating a node and the model has responded to that. If yes, then we need to ask the user for their consent to sign the agreement etc
+      //     conversation.nodeState = true;
+      //     await newMessage.save();
+      //   } else {
+      //     // Check if the user has said yes to creating a node and the model has responded to that. If yes, then we need to ask the user for their consent to sign the agreement etc
 
-          const result = await askAiIfTheAssistantHasSentTheNodeLink(
-            messageContent
-          );
+      //     const result = await askAiIfTheAssistantHasSentTheNodeLink(
+      //       messageContent
+      //     );
 
-          if (result) {
-            conversation.sentNodeLink = true;
-          }
+      //     if (result) {
+      //       conversation.sentNodeLink = true;
+      //     }
 
-          console.log('askAiIfTheAssistantHasSentTheNodeLink', { result });
-        }
-      }
+      //     console.log('askAiIfTheAssistantHasSentTheNodeLink', { result });
+      //   }
+      // }
     }
 
     if (newMessage) {
       // console.log("New msg created : ", newMessage)
       sendSSEUpdate(conversationId, {
-        type: 'new_message',
-        message: newMessage
+        type: "new_message",
+        message: newMessage,
       });
     }
-''
+    ("");
     await conversation.save();
   } catch (err) {
     console.log({ err });
@@ -437,7 +438,7 @@ const getConversationMessages = async (req, res) => {
     const messages = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
-    console.log('Returning messages for convo: ');
+    console.log("Returning messages for convo: ");
     res.status(200).json(messages);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -465,7 +466,7 @@ const renameConversation = async (req, res) => {
       { new: true }
     );
     if (!conversation)
-      return res.status(404).json({ error: 'Conversation not found' });
+      return res.status(404).json({ error: "Conversation not found" });
     res.status(200).json(conversation);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -479,10 +480,10 @@ const deleteConversation = async (req, res) => {
       _id: conversationId,
     });
     if (!deletedConversation)
-      return res.status(404).json({ error: 'Conversation not found' });
+      return res.status(404).json({ error: "Conversation not found" });
     res
       .status(200)
-      .json({ message: 'Conversation and its messages deleted successfully' });
+      .json({ message: "Conversation and its messages deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -495,11 +496,11 @@ const chatImgAnalysis = async (req, res) => {
     // console.log("File url : ", fileUrl);
     // console.log("Fileee : ", req.file)
 
-    const imgBuffer = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-    const base64Image = Buffer.from(imgBuffer.data).toString('base64');
+    const imgBuffer = await axios.get(fileUrl, { responseType: "arraybuffer" });
+    const base64Image = Buffer.from(imgBuffer.data).toString("base64");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" }); // "gemini-2.0-flash-exp", "gemini-1.5-pro" also works
 
     // Create image part from buffer
     const imagePart = {
@@ -548,14 +549,14 @@ const chatImgAnalysis = async (req, res) => {
     await botMessage.save();
 
     res.status(200).json({
-      message: 'Image Upload/Analysis success',
+      message: "Image Upload/Analysis success",
       content: result,
       newMsg: userMessage,
     });
   } catch (error) {
-    console.log('Error Uploading/Analyzing Image : ', error);
+    console.log("Error Uploading/Analyzing Image : ", error);
     res.status(500).json({
-      message: 'Error Uploading/Analyzing Image',
+      message: "Error Uploading/Analyzing Image",
     });
   }
 };
@@ -564,9 +565,9 @@ const chatPdfAnalysis = async (req, res) => {
   try {
     const fileUrl = req?.file?.path;
     const response = await axios.get(fileUrl, {
-      responseType: 'arraybuffer',
+      responseType: "arraybuffer",
     });
-    const pdfBuffer = Buffer.from(response.data, 'binary');
+    const pdfBuffer = Buffer.from(response.data, "binary");
 
     // Parse the PDF using pdf-parse
     const pdfData = await pdfParse(pdfBuffer);
@@ -586,11 +587,11 @@ Response format:
     const completion = await groq.chat.completions.create({
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
-      model: 'llama3-8b-8192',
+      model: "llama3-8b-8192",
     });
 
     if (
@@ -599,13 +600,13 @@ Response format:
       !completion.choices.length ||
       !completion.choices[0].message
     ) {
-      throw new Error('Failed to generate title and summary from Groq.');
+      throw new Error("Failed to generate title and summary from Groq.");
     }
 
     const responseText = completion.choices[0].message.content;
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Failed to extract JSON from Groq response.');
+      throw new Error("Failed to extract JSON from Groq response.");
     }
 
     const parsedResponse = JSON.parse(jsonMatch);
@@ -630,15 +631,61 @@ Response format:
     await botMessage.save();
 
     res.status(200).json({
-      message: 'Document Upload/Analysis success',
+      message: "Document Upload/Analysis success",
       content: summary,
       newMsg: userMessage,
     });
   } catch (error) {
-    console.log('Error Uploading/Analyzing Document : ', error);
+    console.log("Error Uploading/Analyzing Document : ", error);
     res.status(500).json({
-      message: 'Error Uploading/Analyzing Document',
+      message: "Error Uploading/Analyzing Document",
     });
+  }
+};
+
+const generateQuestions = async (req, res) => {
+  const { previousAnswers } = req.body;
+
+  const prompt = `
+           Based on the following medical questionnaire responses, generate 2 relevant follow-up questions. 
+           Consider the patient's symptoms, medical history, and current medications.
+           You should respond strictly in the following JSON format without any additional text:
+           {
+             "questions": [
+               {"question": "first follow-up question"},
+               {"question": "second follow-up question"}
+             ]
+           }
+           Make the questions specific and relevant to the patient's condition.
+           Each question should help gather additional important medical information.
+         `;
+  try {
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a medical professional assistant that generates relevant follow-up questions based on patient responses.",
+        },
+        {
+          role: "user",
+          content: `Previous answers: ${JSON.stringify(
+            previousAnswers
+          )}\n\n${prompt}`,
+        },
+      ],
+      model: "llama3-8b-8192",
+      temperature: 0.5,
+      max_tokens: 1024,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || '';
+    const questions = JSON.parse(responseText);
+    res.status(200).json(questions);
+
+  } catch (error) {
+    console.log("Error generating questions: ", error);
+    res.status(500).json({ message: 'Error generating questions', error: error.message });
   }
 };
 
@@ -651,4 +698,5 @@ module.exports = {
   renameConversation,
   chatImgAnalysis,
   chatPdfAnalysis,
+  generateQuestions,
 };
