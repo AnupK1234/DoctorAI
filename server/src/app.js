@@ -13,13 +13,14 @@ const userRoutes = require("./routes/v1/userRoutes");
 const analysisRoutes = require("./routes/v1/analysisRoute");
 const User = require("./models/User")
 const Groq = require("groq-sdk");
+const {setupSSE} = require("./utils/sseHandler")
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 connectDB();
 
 const app = express();
-
+ 
 // Middleware
 app.use(morgan("tiny"));
 app.use(cookieParser());
@@ -30,6 +31,9 @@ app.use(
     credentials: true,
   })
 );
+
+// server side events
+setupSSE(app);
 
 // Routes
 app.use("/api/v1/auth", authRoutes);

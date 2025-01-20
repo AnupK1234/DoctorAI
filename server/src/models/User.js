@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema(
     referralCode: { type: String },
     documentSigned: { type: Boolean, default: false },
     docusignEnvelopeId: { type: String },
+    isVerified: { type: Boolean, default: false },
+    otp: { type: Number },
+    otpExpires: { type: Number },
   },
   { timestamps: true }
 );
