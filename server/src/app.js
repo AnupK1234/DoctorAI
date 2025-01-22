@@ -74,7 +74,7 @@ app.post("/docusign-webhook", async (req, res) => {
 });
 
 
-const OPENAI_API_URL = process.env.OPENAI_API_URL;
+const OPENAI_API_URL = process.env.OPENAI_API_URL1;
 app.post('/eleven/v1/chat/completions', async (req, res) => {
   const { messages, model, stream } = req.body;
   
