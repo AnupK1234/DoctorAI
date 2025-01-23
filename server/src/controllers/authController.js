@@ -146,7 +146,7 @@ const signup = async (req, res) => {
 
     res.status(201).json({
       message: "User created successfully",
-      user: { id: user._id, email, name },
+      user: { _id: user._id, email, name },
       cookie: { token, userObject },
     });
   } catch (error) {
@@ -221,7 +221,7 @@ const login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      user: { id: user._id, email, name: user.name },
+      user: { _id: user._id, email, name: user.name },
       cookie: { token, userObject },
     });
   } catch (error) {
