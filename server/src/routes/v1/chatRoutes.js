@@ -9,7 +9,8 @@ const {
   renameConversation,
   chatImgAnalysis,
   chatPdfAnalysis,
-  generateQuestions
+  generateQuestions,
+  analyzeQuestionare
 } = require("../../controllers/chatController");
 const multer = require("multer");
 const upload1 = multer({ storage: multer.memoryStorage() });
@@ -18,6 +19,7 @@ const authMiddleware = require("../../middlewares/authMiddleware");
 
 router.get("/conversations/user/:userId", getUserConversations);
 router.post("/conversations", createConversation);
+router.post("/conversations/analyze-questionare", authMiddleware, analyzeQuestionare);
 router.post("/messages", addMessage);
 router.get("/conversations/:conversationId/messages", getConversationMessages);
 router.put("/conversations/rename", renameConversation);

@@ -228,7 +228,7 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages.slice(1);
-  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL;
   const config = {
     method: "post",
     url: OPENAI_API_URL,
@@ -689,6 +689,56 @@ const generateQuestions = async (req, res) => {
   }
 };
 
+const analyzeQuestionare = async (req, res) => {
+  try {
+    const { questionaireData } = req.body;
+    
+    const completion = await openAiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are an AI medical assistant tasked with generating a precise, issue-specific first message based on the patient's intake information.
+
+Analyze the patient's intake data and identify specific medical conditions or concerns. Then craft a first message that directly addresses these medical issues.
+
+Key Instructions:
+- Carefully extract medical conditions from the intake answers
+- Create a first message that is:
+  1. Specifically tailored to the identified medical issues
+  2. Empathetic and professional
+  3. Directly addressing the patient's primary health concerns
+
+Prioritize mentions of:
+- Chronic conditions (diabetes, hypertension, etc.)
+- Specific symptoms
+- Treatment-related concerns
+- Medication-related queries
+
+Input Intake Information:
+${questionaireData.map((item) => `- ${item.question}: ${item.answer}`).join("\n")}
+
+Output Format (JSON):
+{
+  "firstMessage": "Targeted medical welcome message addressing specific health concerns",
+  "prompt": "Detailed medical communication guidelines"
+}
+`,
+        },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const result = JSON.parse(completion.choices[0].message.content);
+    console.log("RRRRRRRRRRRRRRRRRRRRRRRR : ", result)
+    
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error generating AI avatar prompts:', error);
+    res.status(500).json({ error: 'Failed to generate AI avatar prompts' });
+  }
+}
+
 module.exports = {
   createConversation,
   addMessage,
@@ -699,4 +749,5 @@ module.exports = {
   chatImgAnalysis,
   chatPdfAnalysis,
   generateQuestions,
+  analyzeQuestionare
 };
