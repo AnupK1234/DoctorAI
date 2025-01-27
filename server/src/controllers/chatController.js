@@ -201,6 +201,23 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
     content: msg.content,
   }));
 
+
+
+  const userBackground = convQuestionaire
+    ? `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
+        .map((item) => `- ${item.question}\nUser's Response: ${item.answer}`)
+        .join("\n\n")}`
+    : "";
+
+  messages.unshift({
+    role: "user",
+    content:
+      "You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences." +
+      userBackground,
+  });
+
+  messages.push({ role: "user", content: input });
+
   // If two assistant messages are consecutive, or two user messages are consecutive, club those together
 
   for (let i = 0; i < messages.length - 1; i++) {
@@ -211,23 +228,8 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
     }
   }
 
-  const userBackground = convQuestionaire
-    ? `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
-        .map((item) => `- ${item.question}\nUser's Response: ${item.answer}`)
-        .join("\n\n")}`
-    : "";
-
-  messages.unshift({
-    role: "system",
-    content:
-      "You are a highly knowledgeable and empathetic health expert. Your role is to provide accurate, concise, and professional guidance on a wide range of health topics, including physical health, mental health, nutrition, fitness, preventive care, and common medical conditions. You are designed to assist users with general health concerns, clarify medical concepts, and offer practical advice while ensuring the information is evidence-based and easy to understand. Always give out all the possible information you can on medical related topics. Always provide informaiton on the medicines the user can take etc. Always provide all the information to the user. Also, always ask quesitons you need to understand the situation better if that can help you to give better responses. Respond thoughtfully, maintaining clarity, empathy, and professionalism. Give answers to any and all medical related topics. Always respond in 2-3 sentences." +
-      userBackground,
-  });
-
-  messages.push({ role: "user", content: input });
-
   /** Use of Biomistral for chatting */
-  const messagesCopy = messages.slice(1);
+  const messagesCopy = messages;
   const OPENAI_API_URL = process.env.OPENAI_API_URL;
   const config = {
     method: "post",
@@ -243,6 +245,8 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
     },
     responseType: "json",
   };
+
+  console.log("Message copu : ", messagesCopy)
 
   const openAIResponse = await axios(config);
   // console.log("BIO reply : ", openAIResponse.data.choices[0].message);
@@ -280,9 +284,58 @@ const createConversation = async (req, res) => {
       questionaireData,
     });
     await conversation.save();
-    res.status(201).json(conversation);
+    const firstMessageResponse = await generateFirstMessage(questionaireData);
+    const botMessage = new Message({
+      conversationId: conversation._id,
+      sender: null, // null sender implies AI chatbot
+      content: firstMessageResponse,
+    });
+    await botMessage.save();
+
+    res.status(201).json({conversation, firstMessageResponse});
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+const generateFirstMessage = async (questionaireData) => {
+  // Construct a prompt that includes all questionnaire data
+  const prompt = `
+    Review this medical questionnaire data and generate a first message:
+    ${questionaireData.map(item => `${item.question}: ${item.answer}`).join('\n')}
+
+    Create a warm, specific first message that:
+    1. References the patient's specific medical condition/reason for visit if provided
+    2. Shows understanding of their medical context
+    3. Mentions that you'll help gather important medical information
+    4. Explains how this information will help provide better care
+    5. Uses medical terminology appropriately but remains approachable
+    6. Is 2-3 sentences long
+
+    Example: "Hello! I understand you're seeking help with [specific condition]. I'm here to gather some important information about your medical history and current medications, which will help us provide you with the most appropriate care and guidance."
+  `;
+
+  try {
+    const response = await openAiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system", 
+          content: "You are an expert medical assistant with deep knowledge of medical conditions and terminology. Your communication style is professional yet warm and empathetic."
+        },
+        {
+          role: "user", 
+          content: prompt
+        }
+      ],
+      max_tokens: 150,
+      temperature: 0.7
+    });
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error('Error generating first message:', error);
+    return "Welcome! I'm here to help you with your medical consultation. Let's go through some important information together.";
   }
 };
 
@@ -708,6 +761,7 @@ Key Instructions:
   1. Specifically tailored to the identified medical issues
   2. Empathetic and professional
   3. Directly addressing the patient's primary health concerns
+  4. Concise (max 30 words)
 
 Prioritize mentions of:
 - Chronic conditions (diabetes, hypertension, etc.)
