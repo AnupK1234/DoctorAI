@@ -201,8 +201,6 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
     content: msg.content,
   }));
 
-
-
   const userBackground = convQuestionaire
     ? `\n\nIMPORTANT - The following information was provided by the user in their initial medical questionnaire. Please use this information to provide more personalized responses:\n${convQuestionaire
         .map((item) => `- ${item.question}\nUser's Response: ${item.answer}`)
@@ -230,27 +228,36 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages;
-  const OPENAI_API_URL = process.env.OPENAI_API_URL;
+  const OPENAI_API_URL = process.env.TOGETHER_API_URL;
   const config = {
     method: "post",
     url: OPENAI_API_URL,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${process.env.TOGETHER_AI_API}`,
     },
     data: {
-      model: "gpt-4o",
+      model: "deepseek-ai/DeepSeek-R1",
       messages: messagesCopy,
       stream: false,
     },
     responseType: "json",
   };
 
-  console.log("Message copu : ", messagesCopy)
+  // console.log("Message copu : ", messagesCopy)
 
   const openAIResponse = await axios(config);
-  // console.log("BIO reply : ", openAIResponse.data.choices[0].message);
-  return openAIResponse.data.choices[0].message.content;
+  const fullResponse = openAIResponse.data.choices[0].message.content;
+
+  // Use a regular expression to remove the <think>...</think> part
+  // console.log("RREEE1 : ", fullResponse);
+  const cleanedResponse = fullResponse
+    .replace(/<think>[\s\S]*?<\/think>/, "")
+    .trim();
+
+  // console.log("RREEE2 : ", cleanedResponse);
+
+  return cleanedResponse;
 };
 
 const generateTitle = async (messages) => {
@@ -292,7 +299,7 @@ const createConversation = async (req, res) => {
     });
     await botMessage.save();
 
-    res.status(201).json({conversation, firstMessageResponse});
+    res.status(201).json({ conversation, firstMessageResponse });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -302,7 +309,9 @@ const generateFirstMessage = async (questionaireData) => {
   // Construct a prompt that includes all questionnaire data
   const prompt = `
     Review this medical questionnaire data and generate a first message:
-    ${questionaireData.map(item => `${item.question}: ${item.answer}`).join('\n')}
+    ${questionaireData
+      .map((item) => `${item.question}: ${item.answer}`)
+      .join("\n")}
 
     Create a warm, specific first message that:
     1. References the patient's specific medical condition/reason for visit if provided
@@ -320,21 +329,22 @@ const generateFirstMessage = async (questionaireData) => {
       model: "gpt-4o",
       messages: [
         {
-          role: "system", 
-          content: "You are an expert medical assistant with deep knowledge of medical conditions and terminology. Your communication style is professional yet warm and empathetic."
+          role: "system",
+          content:
+            "You are an expert medical assistant with deep knowledge of medical conditions and terminology. Your communication style is professional yet warm and empathetic.",
         },
         {
-          role: "user", 
-          content: prompt
-        }
+          role: "user",
+          content: prompt,
+        },
       ],
       max_tokens: 150,
-      temperature: 0.7
+      temperature: 0.7,
     });
 
     return response.choices[0].message.content;
   } catch (error) {
-    console.error('Error generating first message:', error);
+    console.error("Error generating first message:", error);
     return "Welcome! I'm here to help you with your medical consultation. Let's go through some important information together.";
   }
 };
@@ -342,7 +352,7 @@ const generateFirstMessage = async (questionaireData) => {
 const addMessage = async (req, res) => {
   try {
     const { conversationId, sender, content } = req.body;
-    console.log("here", req.body);
+    // console.log("here", req.body);
     let conversationHistory = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
@@ -363,7 +373,7 @@ const addMessage = async (req, res) => {
       response = await askMarketingAi(conversationHistory, content);
     } else {
       response = await askAI(conversationHistory, content, convQuestionaire);
-      console.log({ response });
+      // console.log({ response });
     }
 
     const botMessage = new Message({
@@ -732,20 +742,21 @@ const generateQuestions = async (req, res) => {
       max_tokens: 1024,
     });
 
-    const responseText = completion.choices[0]?.message?.content || '';
+    const responseText = completion.choices[0]?.message?.content || "";
     const questions = JSON.parse(responseText);
     res.status(200).json(questions);
-
   } catch (error) {
     console.log("Error generating questions: ", error);
-    res.status(500).json({ message: 'Error generating questions', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error generating questions", error: error.message });
   }
 };
 
 const analyzeQuestionare = async (req, res) => {
   try {
     const { questionaireData } = req.body;
-    
+
     const completion = await openAiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -770,7 +781,9 @@ Prioritize mentions of:
 - Medication-related queries
 
 Input Intake Information:
-${questionaireData.map((item) => `- ${item.question}: ${item.answer}`).join("\n")}
+${questionaireData
+  .map((item) => `- ${item.question}: ${item.answer}`)
+  .join("\n")}
 
 Output Format (JSON):
 {
@@ -784,14 +797,14 @@ Output Format (JSON):
     });
 
     const result = JSON.parse(completion.choices[0].message.content);
-    console.log("RRRRRRRRRRRRRRRRRRRRRRRR : ", result)
-    
+    console.log("RRRRRRRRRRRRRRRRRRRRRRRR : ", result);
+
     res.status(200).json(result);
   } catch (error) {
-    console.error('Error generating AI avatar prompts:', error);
-    res.status(500).json({ error: 'Failed to generate AI avatar prompts' });
+    console.error("Error generating AI avatar prompts:", error);
+    res.status(500).json({ error: "Failed to generate AI avatar prompts" });
   }
-}
+};
 
 module.exports = {
   createConversation,
@@ -803,5 +816,5 @@ module.exports = {
   chatImgAnalysis,
   chatPdfAnalysis,
   generateQuestions,
-  analyzeQuestionare
+  analyzeQuestionare,
 };
