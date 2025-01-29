@@ -232,6 +232,7 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
   const config = {
     method: "post",
     url: OPENAI_API_URL,
+    timeout: 240000,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.TOGETHER_AI_API}`,
