@@ -14,6 +14,8 @@ const analysisRoutes = require("./routes/v1/analysisRoute");
 const User = require("./models/User")
 const Groq = require("groq-sdk");
 const {setupSSE} = require("./utils/sseHandler")
+const allowedOrigins = JSON.parse(process.env.CORS_ORIGIN);
+
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -27,7 +29,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
   })
 );
