@@ -193,6 +193,10 @@ const addMessage = async (req, res) => {
       sender,
       content,
     });
+
+    if(content === "Thank you for signing up! Further details will be shared via email to you.") {
+      await MarketingConversation.findByIdAndUpdate(conversationId, {isNodeRegistered: true})
+    }
   } catch (error) {
     console.error("Error adding single message:", error);
     res.status(500).json({ error: "Error adding single message." });
