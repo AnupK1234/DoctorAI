@@ -5,7 +5,9 @@ const {
   getUserMarketingConversations,
   deleteMarketingConversation,
   getMarketingConversationMessages,
-  addMarketingMessage
+  addMarketingMessage,
+  registerForNode,
+  addMessage
 } = require("../../controllers/marketingChatController");
 
 router.post("/conversations", createMarketingConversation);
@@ -16,5 +18,9 @@ router.get(
   "/conversations/:conversationId/messages",
   getMarketingConversationMessages
 );
+router.post("/register-node-request", registerForNode);
+router.post("/add-single-message", addMessage);
+
+
 
 module.exports = router;

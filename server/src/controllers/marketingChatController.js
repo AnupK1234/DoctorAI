@@ -2,6 +2,7 @@ const axios = require("axios");
 const { calculateCost } = require("../misc/costCalculator.js");
 const MarketingConversation = require("../models/MarketingConversation.js");
 const MarketingMessage = require("../models/MarketingMessage.js");
+const Sponsor = require("../models/Sponsor.js");
 const { marketingSystemPrompt } = require("../misc/constant.js");
 
 const addMarketingMessage = async (req, res) => {
@@ -77,18 +78,15 @@ const addMarketingMessage = async (req, res) => {
         headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       }
     );
-    chatbotMsg = {
+
+    chatbotMsg = new MarketingMessage({
+      conversationId,
       sender: null,
       content: response.data.choices[0].message.content,
-    };
-  }
+    });
 
-  // Save chat conversation to MongoDB
-  // try {
-  //   await Chat.create({ userMessage, botResponse });
-  // } catch (error) {
-  //   console.error("Error saving chat:", error);
-  // }
+    await chatbotMsg.save();
+  }
 
   res.json({ chatbotMsg });
 };
@@ -156,10 +154,57 @@ const getMarketingConversationMessages = async (req, res) => {
   }
 };
 
+const registerForNode = async (req, res) => {
+  try {
+    const { name, address, email, areaOfInterest, researchGoals, nodes, recognition } = req.body;
+
+    if (!name || !email || !nodes) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (nodes < 9 || nodes > 108000) {
+      return res.status(400).json({ error: "Invalid node count. Must be between 9 and 108,000." });
+    }
+
+    const newSponsor = new Sponsor({
+      name,
+      address,
+      email,
+      areaOfInterest,
+      researchGoals,
+      nodes,
+      recognition,
+    });
+
+    await newSponsor.save();
+    res.json({ message: "Signup successful. Further details will be shared via email." });
+  } catch (error) {
+    console.error("Signup Error:", error);
+    res.status(500).json({ error: "Server error. Please try again." });
+  }
+}
+
+const addMessage = async (req, res) => {
+  try {
+    const { content, sender, conversationId } = req.body;
+    
+    await MarketingMessage.create({
+      conversationId,
+      sender,
+      content,
+    });
+  } catch (error) {
+    console.error("Error adding single message:", error);
+    res.status(500).json({ error: "Error adding single message." });
+  }
+}
+
 module.exports = {
   createMarketingConversation,
   addMarketingMessage,
   getUserMarketingConversations,
   deleteMarketingConversation,
   getMarketingConversationMessages,
+  registerForNode,
+  addMessage
 };
