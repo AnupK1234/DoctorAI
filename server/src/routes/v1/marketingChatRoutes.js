@@ -5,9 +5,11 @@ const {
   getUserMarketingConversations,
   deleteMarketingConversation,
   getMarketingConversationMessages,
+  addMarketingMessage
 } = require("../../controllers/marketingChatController");
 
 router.post("/conversations", createMarketingConversation);
+router.post("/messages", addMarketingMessage);
 router.get("/conversations/user/:userId", getUserMarketingConversations);
 router.delete("/conversations/:conversationId", deleteMarketingConversation);
 router.get(

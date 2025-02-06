@@ -2,46 +2,95 @@ const axios = require("axios");
 const { calculateCost } = require("../misc/costCalculator.js");
 const MarketingConversation = require("../models/MarketingConversation.js");
 const MarketingMessage = require("../models/MarketingMessage.js");
+const { marketingSystemPrompt } = require("../misc/constant.js");
 
-const chatWithBot = async (req, res) => {
-  const { userMessage } = req.body;
-  if (!userMessage)
-    return res.status(400).json({ error: "Message is required" });
+const addMarketingMessage = async (req, res) => {
+  const { content, sender, conversationId } = req.body;
+  if (!content) return res.status(400).json({ error: "Message is required" });
 
   let botResponse = "";
+  let chatbotMsg;
 
-  if (userMessage.toLowerCase().includes("learn about nodes")) {
-    botResponse =
-      "The UNIVERSA Scientific Nodes are AI-driven entities designed for research in scientific and societal domains...";
-  } else if (userMessage.toLowerCase().includes("calculate costs")) {
+  await MarketingMessage.create({
+    conversationId,
+    sender,
+    content,
+  });
+
+  // "Learn about nodes" case
+  if (content.toLowerCase().includes("learn about nodes")) {
+    botResponse = `The UNIVERSA Scientific Nodes are advanced AI entities designed for continuous research and innovation across scientific and societal domains. Each node is a dedicated hardware unit equipped with a Large Language Model (LLM), GPU/GLU/TPU, an operating system (Linux), and internet access. They work 24/7/365 to push the boundaries of knowledge and collaborate globally. You can sponsor **Minimum 9** nodes and **Maximum 108,000**, with each node costing **$963/month**`;
+    chatbotMsg = new MarketingMessage({
+      conversationId,
+      sender: null,
+      content: botResponse,
+    });
+
+    await chatbotMsg.save();
+  } else if (content.toLowerCase().includes("ask a question")) {
+    botResponse = `Feel free to ask any question you have regarding nodes?`;
+    chatbotMsg = new MarketingMessage({
+      conversationId,
+      sender: null,
+      content: botResponse,
+    });
+
+    await chatbotMsg.save();
+  } else if (content.toLowerCase().includes("calculate costs")) {
     botResponse =
       "Please enter the number of nodes you'd like to calculate the cost for.";
-  } else if (!isNaN(userMessage)) {
-    const numNodes = parseInt(userMessage, 10);
+    chatbotMsg = new MarketingMessage({
+      conversationId,
+      sender: null,
+      content: botResponse,
+    });
+
+    await chatbotMsg.save();
+  } else if (!isNaN(content)) {
+    const numNodes = parseInt(content, 10);
     const cost = calculateCost(numNodes);
-    botResponse = `The total cost for ${numNodes} nodes is $${cost}.`;
+    botResponse =
+      numNodes > 108000 || numNodes < 9
+        ? `The minimum node allowed are 9 and maximum are 108000`
+        : `The total cost for ${numNodes} nodes is $${cost}.`;
+    chatbotMsg = new MarketingMessage({
+      conversationId,
+      sender: null,
+      content: botResponse,
+    });
+
+    await chatbotMsg.save();
   } else {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-4",
-        messages: [{ role: "user", content: userMessage }],
+        messages: [
+          {
+            role: "system",
+            content: marketingSystemPrompt,
+          },
+          { role: "user", content: content },
+        ],
       },
       {
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+        headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       }
     );
-    botResponse = response.data.choices[0].message.content;
+    chatbotMsg = {
+      sender: null,
+      content: response.data.choices[0].message.content,
+    };
   }
 
   // Save chat conversation to MongoDB
-  try {
-    await Chat.create({ userMessage, botResponse });
-  } catch (error) {
-    console.error("Error saving chat:", error);
-  }
+  // try {
+  //   await Chat.create({ userMessage, botResponse });
+  // } catch (error) {
+  //   console.error("Error saving chat:", error);
+  // }
 
-  res.json({ botResponse });
+  res.json({ chatbotMsg });
 };
 
 const createMarketingConversation = async (req, res) => {
@@ -109,7 +158,7 @@ const getMarketingConversationMessages = async (req, res) => {
 
 module.exports = {
   createMarketingConversation,
-  chatWithBot,
+  addMarketingMessage,
   getUserMarketingConversations,
   deleteMarketingConversation,
   getMarketingConversationMessages,
