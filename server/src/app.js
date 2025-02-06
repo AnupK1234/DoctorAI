@@ -11,6 +11,7 @@ const elevenRoutes = require("./routes/v1/elevenLabRoutes");
 const chatRoutes = require("./routes/v1/chatRoutes");
 const userRoutes = require("./routes/v1/userRoutes");
 const analysisRoutes = require("./routes/v1/analysisRoute");
+const marketingChatRoutes = require("./routes/v1/marketingChatRoutes");
 const User = require("./models/User")
 const Groq = require("groq-sdk");
 const {setupSSE} = require("./utils/sseHandler")
@@ -44,6 +45,7 @@ app.use("/api/v1/conversation", elevenRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/analysis", analysisRoutes)
+app.use("/api/v1/marketing-chat", marketingChatRoutes)
 app.post("/docusign-webhook", async (req, res) => {
   try {
     const { event, data } = req.body;

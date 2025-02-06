@@ -228,17 +228,17 @@ const askAI = async (conversationHistory, input, convQuestionaire) => {
 
   /** Use of Biomistral for chatting */
   const messagesCopy = messages;
-  const OPENAI_API_URL = process.env.TOGETHER_API_URL;
+  const OPENAI_API_URL = process.env.OPENAI_API_URL1;
   const config = {
     method: "post",
     url: OPENAI_API_URL,
     timeout: 240000,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.TOGETHER_AI_API}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     data: {
-      model: "deepseek-ai/DeepSeek-R1",
+      model: "gpt-4o",
       messages: messagesCopy,
       stream: false,
     },
