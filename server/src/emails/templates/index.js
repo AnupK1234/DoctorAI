@@ -40,4 +40,41 @@ const sendResendOTPEmail = async (resend, email, data) => {
   });
 };
 
-module.exports = { sendResendOTPEmail, sendVerificationEmail };
+const sendPaymentEmail = async (resend, email, data) => {
+  const template = getCompiledTemplate("node-payment.html");
+  const html = template(data);
+
+  return await resend.emails.send({
+    from: "Universa Healthcare Team <team@flowwrite.co>",
+    to: email,
+    subject:
+      "Kindly complete you Node subsription Payment - Universa Healthcare",
+    attachments: [
+      {
+        content: fs
+          .readFileSync(
+            path.join(
+              __dirname,
+              "../../documents/Singularity Center Agreement.pdf"
+            )
+          )
+          .toString("base64"),
+        filename: "Singularity Center Agreement.pdf",
+      },
+      {
+        content: fs
+          .readFileSync(
+            path.join(
+              __dirname,
+              "../../documents/UNIVERSA Node Sponsorship Agreement.pdf"
+            )
+          )
+          .toString("base64"),
+        filename: "UNIVERSA Node Sponsorship Agreement.pdf",
+      },
+    ],
+    html,
+  });
+};
+
+module.exports = { sendResendOTPEmail, sendVerificationEmail, sendPaymentEmail };

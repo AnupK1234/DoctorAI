@@ -4,6 +4,9 @@ const MarketingConversation = require("../models/MarketingConversation.js");
 const MarketingMessage = require("../models/MarketingMessage.js");
 const Sponsor = require("../models/Sponsor.js");
 const { marketingSystemPrompt } = require("../misc/constant.js");
+const { stripe } = require("../config/stripe.js")
+const {sendPaymentEmail} = require("../emails/templates/index.js")
+const { resend } = require("../config/resend.js");
 
 const addMarketingMessage = async (req, res) => {
   const { content, sender, conversationId } = req.body;
@@ -156,14 +159,25 @@ const getMarketingConversationMessages = async (req, res) => {
 
 const registerForNode = async (req, res) => {
   try {
-    const { name, address, email, areaOfInterest, researchGoals, nodes, recognition } = req.body;
+    const {
+      name,
+      address,
+      email,
+      areaOfInterest,
+      researchGoals,
+      nodes,
+      recognition,
+      conversationId
+    } = req.body;
 
     if (!name || !email || !nodes) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     if (nodes < 9 || nodes > 108000) {
-      return res.status(400).json({ error: "Invalid node count. Must be between 9 and 108,000." });
+      return res
+        .status(400)
+        .json({ error: "Invalid node count. Must be between 9 and 108,000." });
     }
 
     const newSponsor = new Sponsor({
@@ -175,9 +189,41 @@ const registerForNode = async (req, res) => {
       nodes,
       recognition,
     });
-
     await newSponsor.save();
-    res.json({ message: "Signup successful. Further details will be shared via email." });
+
+    // Stripe Payment Link integration
+    const amount = 963 * nodes;
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Node subscription",
+            },
+            unit_amount: amount * 100, // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: "https://universa-marketing.vercel.app",
+      cancel_url: "https://universa-marketing.vercel.app/in",
+      customer_email: email,
+    });
+
+    await sendPaymentEmail(resend, email, {
+      name,
+      email,
+      stripeLink: session?.url,
+    });
+
+    await MarketingConversation.findByIdAndUpdate(conversationId, {paymentLink: session.url, isConversationOpen: false})
+
+    res.json({
+      message: `Signup successful. Payment Link: ${session?.url}. Further details will be shared via email.`,
+    });
   } catch (error) {
     console.error("Signup Error:", error);
     res.status(500).json({ error: "Server error. Please try again." });

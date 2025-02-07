@@ -9,7 +9,9 @@ const marketingConversationSchema = new mongoose.Schema(
       required: true,
     },
     title: { type: String, default: "Untitled Conversation" },
-    isNodeRegistered: {type: Boolean, default: false}
+    isNodeRegistered: { type: Boolean, default: false },
+    paymentLink: { type: String },
+    isConversationOpen: {type: Boolean, default: true}
   },
   { timestamps: true }
 );
