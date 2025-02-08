@@ -4,8 +4,8 @@ const MarketingConversation = require("../models/MarketingConversation.js");
 const MarketingMessage = require("../models/MarketingMessage.js");
 const Sponsor = require("../models/Sponsor.js");
 const { marketingSystemPrompt } = require("../misc/constant.js");
-const { stripe } = require("../config/stripe.js")
-const {sendPaymentEmail} = require("../emails/templates/index.js")
+const { stripe } = require("../config/stripe.js");
+const { sendPaymentEmail } = require("../emails/templates/index.js");
 const { resend } = require("../config/resend.js");
 
 const addMarketingMessage = async (req, res) => {
@@ -68,7 +68,7 @@ const addMarketingMessage = async (req, res) => {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
@@ -76,17 +76,50 @@ const addMarketingMessage = async (req, res) => {
           },
           { role: "user", content: content },
         ],
+        functions: [
+          {
+            name: "calculate_cost",
+            description:
+              "Extract the number of nodes from the user's request and calculate the total cost. The number can be written in digits (e.g., 1000) or words (e.g., 'one thousand two hundred'). It may also include mixed formats (e.g., 'one one two one' for 1121).",
+            parameters: {
+              type: "object",
+              properties: {
+                numNodes: {
+                  type: "integer",
+                  description: "The number of nodes requested.",
+                },
+              },
+              required: ["numNodes"],
+            },
+          },
+        ],
+        function_call: "auto",
       },
       {
         headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       }
     );
 
-    chatbotMsg = new MarketingMessage({
-      conversationId,
-      sender: null,
-      content: response.data.choices[0].message.content,
-    });
+    const message = response.data.choices[0].message;
+
+    if (
+      message.function_call &&
+      message.function_call.name === "calculate_cost"
+    ) {
+      const { numNodes } = JSON.parse(message.function_call.arguments);
+      const cost = calculateCost(numNodes);
+      chatbotMsg = new MarketingMessage({
+        conversationId,
+        sender: null,
+        content: `The total cost for **${numNodes} nodes** is **$${cost}**.`,
+      });
+    } else {
+      chatbotMsg = new MarketingMessage({
+        conversationId,
+        sender: null,
+        content: message.content,
+      });
+    }
 
     await chatbotMsg.save();
   }
@@ -166,7 +199,7 @@ const registerForNode = async (req, res) => {
       researchGoals,
       nodes,
       recognition,
-      conversationId
+      conversationId,
     } = req.body;
 
     if (!name || !email || !nodes) {
@@ -192,7 +225,7 @@ const registerForNode = async (req, res) => {
 
     // Stripe Payment Link integration
     const amount = 963 * nodes;
-    
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -219,7 +252,11 @@ const registerForNode = async (req, res) => {
       stripeLink: session?.url,
     });
 
-    await MarketingConversation.findByIdAndUpdate(conversationId, {paymentLink: session.url, isConversationOpen: false})
+    await MarketingConversation.findByIdAndUpdate(conversationId, {
+      paymentLink: session.url,
+      isConversationOpen: false,
+      title: `Closed: ${areaOfInterest}`,
+    });
 
     res.json({
       message: `Signup successful. Payment Link: ${session?.url}. Further details will be shared via email.`,
@@ -228,26 +265,31 @@ const registerForNode = async (req, res) => {
     console.error("Signup Error:", error);
     res.status(500).json({ error: "Server error. Please try again." });
   }
-}
+};
 
 const addMessage = async (req, res) => {
   try {
     const { content, sender, conversationId } = req.body;
-    
+
     await MarketingMessage.create({
       conversationId,
       sender,
       content,
     });
 
-    if(content === "Thank you for signing up! Further details will be shared via email to you.") {
-      await MarketingConversation.findByIdAndUpdate(conversationId, {isNodeRegistered: true})
+    if (
+      content ===
+      "Thank you for signing up! Further details will be shared via email to you."
+    ) {
+      await MarketingConversation.findByIdAndUpdate(conversationId, {
+        isNodeRegistered: true,
+      });
     }
   } catch (error) {
     console.error("Error adding single message:", error);
     res.status(500).json({ error: "Error adding single message." });
   }
-}
+};
 
 module.exports = {
   createMarketingConversation,
@@ -256,5 +298,5 @@ module.exports = {
   deleteMarketingConversation,
   getMarketingConversationMessages,
   registerForNode,
-  addMessage
+  addMessage,
 };
