@@ -130,7 +130,6 @@ const getUserMarketingConversations = async (req, res) => {
 const deleteMarketingConversation = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    console.log("DSFAASFS : ", conversationId);
 
     const deletedConversation = await MarketingConversation.findOneAndDelete({
       _id: conversationId,
@@ -193,6 +192,7 @@ const registerForNode = async (req, res) => {
 
     // Stripe Payment Link integration
     const amount = 963 * nodes;
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
