@@ -48,7 +48,7 @@ const sendPaymentEmail = async (resend, email, data) => {
     from: "Universa Healthcare Team <team@flowwrite.co>",
     to: email,
     subject:
-      "Kindly complete you Node subsription Payment - Universa Healthcare",
+      "Welcome to UNIVERSA – Next Steps for Your Node Sponsorship",
     attachments: [
       {
         content: fs

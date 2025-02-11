@@ -23,7 +23,7 @@ const addMarketingMessage = async (req, res) => {
 
   // "Learn about nodes" case
   if (content.toLowerCase().includes("learn about nodes")) {
-    botResponse = `The UNIVERSA Scientific Nodes are advanced AI entities designed for continuous research and innovation across scientific and societal domains. Each node is a dedicated hardware unit equipped with a Large Language Model (LLM), GPU/GLU/TPU, an operating system (Linux), and internet access. They work 24/7/365 to push the boundaries of knowledge and collaborate globally. You can sponsor **Minimum 9** nodes and **Maximum 108,000**, with each node costing **$963/month**`;
+    botResponse = `The UNIVERSA Scientific Nodes are advanced AI entities designed for continuous research and innovation across scientific and societal domains. Each node is a dedicated hardware unit equipped with a Large Language Model (LLM), GPU/GLU/TPU, an operating system (Linux), and internet access. They work 24/7/365 to push the boundaries of knowledge and collaborate globally. You can sponsor **Minimum 9** nodes and **Maximum 108,000**, with each node costing **USD $963/month.**`;
     chatbotMsg = new MarketingMessage({
       conversationId,
       sender: null,
@@ -56,7 +56,7 @@ const addMarketingMessage = async (req, res) => {
     botResponse =
       numNodes > 108000 || numNodes < 9
         ? `The minimum node allowed are 9 and maximum are 108000`
-        : `The total cost for ${numNodes} nodes is $${cost}.`;
+        : `The total cost for ${numNodes} nodes is USD $${cost}.`;
     chatbotMsg = new MarketingMessage({
       conversationId,
       sender: null,
@@ -111,7 +111,7 @@ const addMarketingMessage = async (req, res) => {
       chatbotMsg = new MarketingMessage({
         conversationId,
         sender: null,
-        content: `The total cost for **${numNodes} nodes** is **$${cost}**.`,
+        content: `The total cost for **${numNodes} nodes** is **USD $${cost}**.`,
       });
     } else {
       chatbotMsg = new MarketingMessage({
@@ -132,7 +132,7 @@ const createMarketingConversation = async (req, res) => {
     const { userId } = req.body;
     const conversation = new MarketingConversation({
       userId,
-      title: "Untitled Conversation",
+      title: "Universa Node conversation",
     });
     await conversation.save();
     const botMessage = new MarketingMessage({
