@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const sponsorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   address: { type: String },
+  country: { type: String },
   email: { type: String, required: true },
   areaOfInterest: { type: String },
   researchGoals: { type: String },

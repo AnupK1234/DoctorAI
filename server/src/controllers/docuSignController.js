@@ -22,7 +22,7 @@ const getAccessToken = async () => {
 };
 
 // Send signing envelope to user
-const sendDocusignEnvelope = async (name, email, newSponsor) => {
+const sendDocusignEnvelope = async (name, email, newSponsor, amount, nodes, country, address, areaOfInterest) => {
   // token for docusign
   const accessToken = await getAccessToken();
 
@@ -36,7 +36,7 @@ const sendDocusignEnvelope = async (name, email, newSponsor) => {
   // Load the PDF document
   const pdfPath = path.resolve(
     __dirname,
-    "../documents/Singularity Center Agreement.pdf"
+    "../documents/Singularity Center Agreement Updated.pdf"
   );
   const pdfBytes = fs.readFileSync(pdfPath);
   const pdfBase64 = pdfBytes.toString("base64");
@@ -57,37 +57,81 @@ const sendDocusignEnvelope = async (name, email, newSponsor) => {
 
   // Signature tab
   const signHere = new docusign.SignHere.constructFromObject({
-    anchorString: "Patient Signature:",
+    anchorString: "\spon-sign",
     anchorXOffset: "1.5",
     anchorUnits: "inches",
   });
 
   // Name tab
   const nameTab = new docusign.Text.constructFromObject({
-    anchorString: "Name:",
-    anchorXOffset: "1",
-    anchorUnits: "inches",
+    anchorString: "[Name:]",
+    // anchorXOffset: "1",
+    // anchorUnits: "inches",
     fontSize: "size12",
     tabLabel: "Name",
     value: name,
   });
 
+  // Address tab
+  const addressTab = new docusign.Text.constructFromObject({
+    anchorString: "spon-address",
+    fontSize: "size12",
+    tabLabel: "Sponsor Address",
+    value: address,
+  });
+
+  // Country tab
+  const countryTab = new docusign.Text.constructFromObject({
+    anchorString: "spon-country",
+    fontSize: "size12",
+    tabLabel: "Sponsor Country",
+    value: country,
+  });
+
+  // Node Amount tab
+  const nodeAmtTab = new docusign.Text.constructFromObject({
+    anchorString: "spon-amt",
+    fontSize: "size12",
+    tabLabel: "Sponsor Amount",
+    value: amount,
+  });
+  
+  // Node Number tab
+  const nodeNumTab = new docusign.Text.constructFromObject({
+    anchorString: "spon-node",
+    fontSize: "size12",
+    tabLabel: "Sponsor Nodes Number",
+    value: nodes,
+  });
+
+  // Title tab
+  const titleTab = new docusign.Text.constructFromObject({
+    anchorString: "spon-title",
+    fontSize: "size12",
+    tabLabel: "Sponsor Title",
+    value: areaOfInterest,
+  });
+
   // Email tab
   const emailTab = new docusign.Text.constructFromObject({
     anchorString: "Email Address:",
-    anchorXOffset: "1",
-    anchorUnits: "inches",
     fontSize: "size12",
     tabLabel: "Email",
     value: email,
   });
+  
+  const phoneNumTab = new docusign.Text.constructFromObject({
+    anchorString: "\ph1",
+    fontSize: "size12",
+    tabLabel: "Phone Number"
+  });
 
   // Date tab
   const dateTab = new docusign.DateSigned.constructFromObject({
-    anchorString: "Date:",
-    anchorXOffset: "1",
-    anchorUnits: "inches",
-    tabLabel: "DateSigned",
+    anchorString: "\date-h",
+    tabLabel: "DateSigned"
+    // anchorXOffset: "1",
+    // anchorUnits: "inches",
   });
 
   //
@@ -104,7 +148,7 @@ const sendDocusignEnvelope = async (name, email, newSponsor) => {
   // Combine all tabs
   const tabs = new docusign.Tabs.constructFromObject({
     signHereTabs: [signHere],
-    textTabs: [nameTab, emailTab], // add 'refTab' if required later
+    textTabs: [nameTab, emailTab, addressTab, nodeAmtTab, titleTab, countryTab, nodeNumTab, phoneNumTab], // add 'refTab' if required later
     dateSignedTabs: [dateTab],
   });
   signer.tabs = tabs;

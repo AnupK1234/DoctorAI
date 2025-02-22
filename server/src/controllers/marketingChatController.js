@@ -7,7 +7,9 @@ const { marketingSystemPrompt } = require("../misc/constant.js");
 const { stripe } = require("../config/stripe.js");
 const { sendPaymentEmail } = require("../emails/templates/index.js");
 const { resend } = require("../config/resend.js");
-const { sendDocusignEnvelope } = require("../controllers/docuSignController.js");
+const {
+  sendDocusignEnvelope,
+} = require("../controllers/docuSignController.js");
 
 const addMarketingMessage = async (req, res) => {
   const { content, sender, conversationId } = req.body;
@@ -201,6 +203,7 @@ const registerForNode = async (req, res) => {
       nodes,
       recognition,
       conversationId,
+      country,
     } = req.body;
 
     if (!name || !email || !nodes) {
@@ -221,6 +224,7 @@ const registerForNode = async (req, res) => {
       researchGoals,
       nodes,
       recognition,
+      country,
     });
     await newSponsor.save();
 
@@ -259,7 +263,7 @@ const registerForNode = async (req, res) => {
       title: `Closed: ${areaOfInterest}`,
     });
 
-    sendDocusignEnvelope(name, email, newSponsor)
+    sendDocusignEnvelope(name, email, newSponsor, amount, nodes, country, address, areaOfInterest);
 
     res.json({
       message: `Signup successful. Payment Link: ${session?.url}. Further details will be shared via email.`,
