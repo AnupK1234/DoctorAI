@@ -10,10 +10,11 @@ const {
   chatImgAnalysis,
   chatPdfAnalysis,
   generateQuestions,
-  analyzeQuestionare
+  analyzeQuestionare,
+  transcribeAudio
 } = require("../../controllers/chatController");
 const multer = require("multer");
-const upload1 = multer({ storage: multer.memoryStorage() });
+const upload1 = multer({ dest: "uploads/" });
 const { upload, uploadFile } = require("../../utils/cloudinary");
 const authMiddleware = require("../../middlewares/authMiddleware");
 
@@ -27,5 +28,7 @@ router.delete("/conversations/:conversationId", deleteConversation);
 router.post("/img-analysis", authMiddleware, upload.single("file"), chatImgAnalysis);
 router.post("/pdf-analysis", authMiddleware, upload.single("file"), chatPdfAnalysis);
 router.post("/generate-questions", authMiddleware, generateQuestions)
+router.post("/transcribe", upload1.single("audio"), transcribeAudio)
+
 
 module.exports = router;

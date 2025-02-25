@@ -807,6 +807,31 @@ Output Format (JSON):
   }
 };
 
+// Convert user spoken speech to text in chat input
+const transcribeAudio = async (req, res) => {
+  try {
+    const audioFile = req.file;
+
+    if (!audioFile) {
+      return res.status(400).json({ error: "No audio file uploaded" });
+    }
+
+    const audioFilePath = `${audioFile.path}.webm`;
+    fs.renameSync(audioFile.path, audioFilePath);
+
+    const response = await openAiClient.audio.transcriptions.create({
+      file: fs.createReadStream(audioFilePath),
+      model: "whisper-1",
+    });
+
+    fs.unlinkSync(audioFilePath);
+    res.json({ text: response.text });
+  } catch (error) {
+    console.error("Transcription error:", error);
+    res.status(500).json({ error: "Failed to transcribe audio" });
+  }
+}
+
 module.exports = {
   createConversation,
   addMessage,
@@ -818,4 +843,5 @@ module.exports = {
   chatPdfAnalysis,
   generateQuestions,
   analyzeQuestionare,
+  transcribeAudio
 };
